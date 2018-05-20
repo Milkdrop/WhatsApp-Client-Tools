@@ -1,16 +1,8 @@
-var style = document.createElement('style');
-style.type = 'text/css';
-style.innerHTML = '.MODDED { background-color: #00000000; width: 100%; height: 100%; overflow: hidden; }';
-document.querySelector("#side > header > div._2umId > div._1WliW > img").src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
-document.getElementsByTagName('head')[0].appendChild(style);
-
-document.getElementsByTagName('body')[0].style.backgroundImage='url(https://i.imgur.com/yv71iCt.jpg)' //Set BG :^)
-document.getElementById('app').firstChild.className = 'MODDED app-wrapper-web bFqKf ';
-
-var BGimg = document.createElement('img'); // is a node
-//BGimg.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/profilium.png";
 var timer = setInterval(general,1000);
 var botnet = setInterval(setbotnet,250);
+var BGimg = document.createElement('img');
+var PROFimg;
+var Init = 0;
 var SpamTimer = 0;
 var ChillABit = 0;
 var Sending = 0;
@@ -19,6 +11,7 @@ var Sending = 0;
 //document.querySelector("#side > header > div._20NlL > div > span > div.rAUz7:last-child > span > div > ul > li:nth-child(1) > div").innerHTML = "freesex"
 
 function setbotnet() {
+	if (Init == 1) {
 	var imag = document.querySelector("#app > div > div > div.MZIyP > div._3q4NP.k1feT > span > div > div > div > div._12fSF > div > div > div > div > div > img");
 	var chatBG = document.querySelector("#main > div._3zJZ2");
 	if (chatBG != null) {
@@ -28,6 +21,10 @@ function setbotnet() {
 	if (imag != null)
 	if (imag.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif")
 		imag.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
+	}
+	
+	if (PROFimg.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif")
+		PROFimg.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
 }
 
 	function sleep(ms) {
@@ -36,6 +33,19 @@ function setbotnet() {
 
     function general(){
         if(document.getElementsByClassName("app-wrapper-web bFqKf")[0] != null){
+			var style = document.createElement('style');
+			style.type = 'text/css';
+			style.innerHTML = '.MODDED { background-color: #00000000; width: 100%; height: 100%; overflow: hidden; }';
+			document.querySelector("#side > header > div._2umId > div._1WliW > img").src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
+			document.getElementsByTagName('head')[0].appendChild(style);
+
+			document.getElementsByTagName('body')[0].style.backgroundImage='url(https://i.imgur.com/yv71iCt.jpg)' //Set BG :^)
+			document.getElementById('app').firstChild.className = 'MODDED app-wrapper-web bFqKf ';
+
+			BGimg.src = "";
+			PROFimg = document.querySelector("#side > header > div._2umId > div._1WliW > img");
+			Init = 1;
+
             var item2 = document.getElementsByClassName("_3auIg")[0];
             var panel = document.getElementsByClassName("swl8g")[0];
             var SpamBot = item2.cloneNode(true);
@@ -62,6 +72,8 @@ function setbotnet() {
 		if (Sending == 1) {
 			InputEvent = Event || InputEvent;
 			var message = document.getElementById("mensaje").value;       // Get text to spam
+			if (message == "")
+				message = "‫";
 			var input = document.querySelector("#main > footer > div._3oju3 > div._2bXVy > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 			var evt = new InputEvent('input', {						// Create a new event from type "input"
 				bubbles: true,
