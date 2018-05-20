@@ -2,6 +2,9 @@ var timer = setInterval(general,1000);
 var SpamTimer = 0;
 var ChillABit = 0;
 var Sending = 0;
+//simulate(document.querySelector("#side > header > div._20NlL > div > span > div.rAUz7:last-child > div"), "click");
+//simulatedClick(document.getElementById("btn"));
+//document.querySelector("#side > header > div._20NlL > div > span > div.rAUz7:last-child > span > div > ul > li:nth-child(1) > div").innerHTML = "freesex"
 
 	function sleep(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms));
@@ -11,10 +14,13 @@ var Sending = 0;
         if(document.getElementsByClassName("_1FKgS app-wrapper-web bFqKf")[0] != null){
             var item2 = document.getElementsByClassName("_3auIg")[0];
             var panel = document.getElementsByClassName("swl8g")[0];
-            var element = item2.cloneNode(true);							  // Create text and reps inputs
-            element.style.zIndex = 0;                // This way the menu doesn't go below our app
-            element.innerHTML = "<br> <br> With Love from Cad3nce (^˵◕ω◕˵^) <br><br><br> <input type='text' id='mensaje' placeholder='Message To Spam' style='margin-right:10px' size='19' class='align-left'> <div id='CancelButt' data-icon='x' class='' style='margin-left: 10px;cursor:pointer;'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='30' height='30'> <path opacity='.45' fill='#263238' d='M19.1 17.2l-5.3-5.3 5.3-5.3-1.8-1.8-5.3 5.4-5.3-5.3-1.8 1.7 5.3 5.3-5.3 5.3L6.7 19l5.3-5.3 5.3 5.3 1.8-1.8z'></path></svg></div> <div id='spam' data-icon=\"send\" class=\"img icon icon-send\" style='margin-left: 10px;cursor:pointer;'><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\"><path opacity=\".4\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z\"></path></svg></div>";
-            panel.insertBefore(element, panel.childNodes[1]);					  // Insert everything we have created
+            var SpamBot = item2.cloneNode(true);
+            //var MakeGroup = SpamBot.cloneNode(true);
+            SpamBot.style.zIndex = 0;                // This way the menu doesn't go below our app
+            SpamBot.innerHTML = "With Love from Cad3nce (^˵◕ω◕˵^) <input type='text' id='mensaje' placeholder='Message To Spam' size='19' class='selectable-text invisible-space copyable-text'> <div id='CancelButt' title='PAUSE BOT' data-icon='x' class='' style='margin-left: 10px;cursor:pointer;'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='30' height='30'> <path opacity='.45' fill='#263238' d='M19.1 17.2l-5.3-5.3 5.3-5.3-1.8-1.8-5.3 5.4-5.3-5.3-1.8 1.7 5.3 5.3-5.3 5.3L6.7 19l5.3-5.3 5.3 5.3 1.8-1.8z'></path></svg></div> <div id='spam' title='START BOT' data-icon=\"send\" class=\"img icon icon-send\" style='margin-left: 10px;cursor:pointer;'><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\"><path opacity=\".4\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z\"></path></svg></div>";
+			//MakeGroup.innerHTML += "<br> <br> <br> <div id = 'MakeGR' data-icon='chat' class=''><svg id='Layer_1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'><path opacity='.55' fill='#263238' d='M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821c-.001-1.032-1.032-1.646-2.064-1.646zm-4.989 9.869H7.041V11.1h6.975v1.944zm3-4H7.041V7.1h9.975v1.944z'></path></svg></div>";
+            panel.insertBefore(SpamBot, panel.childNodes[1]);					  // Insert everything we have created
+			//panel.insertBefore(MakeGroup, panel.childNodes[2]);					  // Insert everything we have created
             document.getElementById("spam").addEventListener("click", spam);     // Assign a function to the botton
 			document.getElementById("CancelButt").addEventListener("click", CancelBoi);
             clearInterval(timer);
