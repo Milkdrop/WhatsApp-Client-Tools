@@ -77,9 +77,11 @@ function resp (str) {
 		str = str.substring (9, str.length - 1);
 		console.log (str);
 		if (str.substring(0, 4) == "help") {
-			printer += """LunaBot ping: Check if the LunaBot service is online.
-			LunaBot
-			"""
+			printer += "LunaBot ping: Check if the LunaBot service is online.\n\n";
+			printer += "LunaBot time: Check time.\n\n";
+			printer += "LunaBot weather: Check weather in any city you like.\n\n";
+			printer += "LunaBot say: Make LunaBot say anything you want! Don't be too silly tho\n\n";
+			printer += "LunaBot ask: [In Construction] Send WolframAlpha Query\n\n";
 		} else if (str.substring(0, 4) == "ping") {
 			printer += "PONG!";
 		} else if (str.substring(0, 4) == "time") {
@@ -93,13 +95,17 @@ function resp (str) {
 				xmlHttp.open("GET", "https://vremeainpulamea.sirb.net/?oras=" + str, false);
 				xmlHttp.send();
 				responser = xmlHttp.responseText;
-				var n = responser.indexOf("class=\"oras\"");
-				responser = responser.substring (n + 13);
-				var astre = responser.indexOf("Astrele");
-				var fin = responser.indexOf("Alege");
-				printer += responser.substring(0, astre);
-				printer += "\n\n";
-				printer += responser.substring(astre, fin);
+				if (responser.indexOf ("Ai stricat pagina, ţigane.") != -1) {
+					printer += "Could not find " + str + " city.";
+				} else {
+					var n = responser.indexOf("class=\"oras\"");
+					responser = responser.substring (n + 13);
+					var astre = responser.indexOf("Astrele");
+					var fin = responser.indexOf("Alege");
+					printer += responser.substring(0, astre);
+					printer += "\n\n";
+					printer += responser.substring(astre, fin);
+				}
 			}
 		} else if (str.substring(0, 3) == "say") {
 			printer = str.substring (4);
@@ -111,7 +117,6 @@ function resp (str) {
 			xmlHttp.send();
 			responser = xmlHttp.responseText;
 			printer += responser;
-
 		}
 
 		if (printer == "LunaBot v1.0 (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧\n\n")
