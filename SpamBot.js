@@ -15,16 +15,20 @@ function setbotnet() {
 	var imag = document.querySelector("#app > div > div > div.MZIyP > div._3q4NP.k1feT > span > div > div > div > div._12fSF > div > div > div > div > div > img");
 	var chatBG = document.querySelector("#main > div._3zJZ2");
 	if (chatBG != null) {
-		if (chatBG.childElementCount < 3)
+		if (chatBG.childElementCount < 4) {
 			chatBG.appendChild(BGimg);
+        }
 	}
-	if (imag != null)
-	if (imag.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif")
-		imag.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
-	}
-	
-	if (PROFimg.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif")
+
+	if (imag != null) {
+	    if (imag.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif") {
+		    imag.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
+        }
+    }
+	if (PROFimg.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif") {
 		PROFimg.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
+    }
+    }
 }
 
 	function sleep(ms) {
@@ -39,7 +43,7 @@ function setbotnet() {
 			document.querySelector("#side > header > div._2umId > div._1WliW > img").src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
 			document.getElementsByTagName('head')[0].appendChild(style);
 
-			document.getElementsByTagName('body')[0].style.backgroundImage='url(https://i.imgur.com/yv71iCt.jpg)' //Set BG :^)
+			document.getElementsByTagName('body')[0].style.backgroundImage='url(https://github.com/MoonfireSeco/puteri2/raw/master/bg_sakura.png)' //Set BG :^)
 			document.getElementById('app').firstChild.className = 'MODDED app-wrapper-web bFqKf ';
 
 			BGimg.src = "";
@@ -62,42 +66,44 @@ function setbotnet() {
             console.log("WS Spam: Waiting for whatsapp to load...");
         }
     }
-	
+
 	function CancelBoi () {
 		Sending = 0;
 		clearInterval(dispatch);
 	}
-	
+
 	function SendMessage () {
 		if (Sending == 1) {
 			InputEvent = Event || InputEvent;
 			var message = document.getElementById("mensaje").value;       // Get text to spam
-			if (message == "")
+			if (message == "") {
 				message = "‫";
-			var input = document.querySelector("#main > footer > div._3oju3 > div._2bXVy > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
+            }
+            var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 			var evt = new InputEvent('input', {						// Create a new event from type "input"
 				bubbles: true,
 			composer: true
 			});
 			input.innerHTML = message;								// Get text to spam
 			input.dispatchEvent(evt);								// Fire the event (inserts text) in the input field.
-			var SendButts = document.querySelector("#main > footer > div._3oju3 > button._2lkdt");  // Select the button Kek
+			var SendButts = document.querySelector("#main > footer > div._3pkkz > div.weEq5 > button._35EW6");  // Select the button Kek
 			SendButts.click();
 		}
 	}
-	
+
     async function dispatch() {
 		ChillABit = 0;
 		var LastMessageTime = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div._3_7SH._3DFk6.message-out > div > div._2f-RV > div > span");
 		if (LastMessageTime != null) {
-			if (Sending == 1)
+			if (Sending == 1) {
 				LastMessageTime.innerHTML = "SCANN3D";
+            }
 			var MessageSent = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div > div > div._2f-RV > div > div > span");
 			if (MessageSent.getAttribute("data-icon") == "msg-time") {
 				ChillABit = 1;
 			}
 		}
-		
+
 		if (!ChillABit) {
 			SendMessage();
 		}
@@ -108,4 +114,3 @@ function setbotnet() {
 		SendMessage();
 		SpamTimer = setInterval(dispatch,10)
     }
-	
