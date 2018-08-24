@@ -15,6 +15,8 @@
 var initialized = 0;
 var botnet = setInterval(checkmsg, 50);
 var initer = setInterval(init, 1000);
+var bunn = setInterval(annoyware, 7200000);
+
 var msgside;
 
 //CHECK MSG//
@@ -38,6 +40,20 @@ function init() {
 	}
 }
 
+function annoyware()
+{
+	var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
+		var evt = new InputEvent('input', {
+			bubbles: true,
+			composer: true
+		});
+
+		input.innerHTML = "Want to check out LunaBot? Type *LunaBot help* for commands!";
+		input.dispatchEvent(evt);
+		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
+		SendButts.click();
+}
+
 function checkmsg() {
     if (initialized == 1) {
     children = msgside.children;
@@ -59,7 +75,6 @@ function checkmsg() {
 
 						newmsgbubble.innerHTML = "READ";
 						console.log (msg);
-						setTimeout(function() { resp(msg.title); }, 150);
 					}
 				}
             }
@@ -71,8 +86,6 @@ function resp (str) {
 	console.log ("Received Message: " + str);
 	var printer = "LunaBot v1.0 (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧\n\n";
 	var luna = str.substring(1, 8);
-	console.log (luna);
-	console.log (luna == "LunaBot");
 	if (luna == "LunaBot") {
 		str = str.substring (9, str.length - 1);
 		console.log (str);
@@ -92,7 +105,7 @@ function resp (str) {
 				printer += "Usage: LunaBot weather City";
 			} else {
 				xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("GET", "https://vremeainpulamea.sirb.net/?oras=" + str, false);
+				xmlHttp.open("GET", "https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str), false);
 				xmlHttp.send();
 				responser = xmlHttp.responseText;
 				if (responser.indexOf ("Ai stricat pagina, ţigane.") != -1) {
@@ -109,14 +122,30 @@ function resp (str) {
 			}
 		} else if (str.substring(0, 3) == "say") {
 			printer = str.substring (4);
-		} else if (str.substring(0, 3) == "ask") {
+		} else if (str.substring(0, 3) == "ask" || str.substring(0, 5) == "solve") {
 			xmlHttp = new XMLHttpRequest();
-			str = str.substring (4);
-			var url = "http://www.wolframalpha.com/input/?i=" + str;
+			if (str.substring(0, 3) == "ask")
+				str = str.substring (4);
+			else
+				str = str.substring (6);
+			var url = "https://www.wolframalpha.com/input/apiExplorer.jsp?input=" + encodeURIComponent(str) + "&format=minput,plaintext&output=JSON&type=full";
 			xmlHttp.open("GET", url, false);
 			xmlHttp.send();
 			responser = xmlHttp.responseText;
-			printer += responser;
+			n = responser.indexOf("\"success\":");
+			responser = responser.substring(n + 11);
+			if (responser.substring(0, 5) == "false") {
+				printer += "Sorry, I did not understand the question.";
+			} else {
+				n = responser.indexOf("Result");
+				responser = responser.substring(n);
+				n = responser.indexOf("plaintext");
+				responser = responser.substring(n + 13);
+				n = responser.indexOf("\"");
+				printer += responser.substring(0, n).replace("\\n", "\n");
+				printer += "\n\n\n";
+				printer += "_Powered by WolframAlpha_";
+			}
 		}
 
 		if (printer == "LunaBot v1.0 (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧\n\n")
