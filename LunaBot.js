@@ -150,7 +150,7 @@ function resp (str) {
 				printer += "Usage: LunaBot weather City";
 			} else {
 				xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("GET", "https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
+				xmlHttp.open("GET", "https://cors-anywhere.herokuapp.com/https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
 				xmlHttp.send();
 				responser = xmlHttp.responseText;
 				if (responser.indexOf ("Ai stricat pagina,") != -1) {
