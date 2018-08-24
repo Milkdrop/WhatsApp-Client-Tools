@@ -15,7 +15,7 @@
 var initialized = 0;
 var botnet = setInterval(checkmsg, 50);
 var initer = setInterval(init, 1000);
-var bunn = setInterval(annoyware, 7200000);
+var bann = setInterval(annoyware, 7200000);
 
 var msgside;
 
@@ -75,6 +75,7 @@ function checkmsg() {
 
 						newmsgbubble.innerHTML = "READ";
 						console.log (msg);
+						resp(msg.title);
 					}
 				}
             }
