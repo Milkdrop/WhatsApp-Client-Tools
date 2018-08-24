@@ -18,7 +18,11 @@ var initer = setInterval(init, 1000);
 var bann = setInterval(annoyware, 7200000);
 
 var msgside;
-var defaultmsg = "LunaBot v1.3 👩🏻‍💻💙\n\n";
+var Emoji_amyPC;
+var Emoji_blueHeart;
+var Emoji_redCross;
+
+var defaultmsg;
 //CHECK MSG//
 var i;
 var children;
@@ -39,6 +43,13 @@ function init() {
 		msgside = document.querySelector("#side > div._1vDUw > div > div > div");
 
         initialized = 1;
+		Emoji_amyPC = String.fromCodePoint(0x1F469);
+		Emoji_amyPC += String.fromCodePoint(0x1F3FB);
+		Emoji_amyPC += String.fromCodePoint(0x200D);
+		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
+		Emoji_blueHeart = String.fromCodePoint(0x1F499);
+		Emoji_redCross = String.fromCodePoint(0x274C);
+		defaultmsg = "LunaBot v1.4 " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		clearInterval(initer);
 	} else {
         console.log("LunaBot: WAITING FOR MESSAGE FEED.");
@@ -47,16 +58,18 @@ function init() {
 
 function annoyware()
 {
-	var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
+	if (initialized == 1) {
+		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 		var evt = new InputEvent('input', {
 			bubbles: true,
 			composer: true
 		});
 
-		input.innerHTML = "Want to check out LunaBot? Type *LunaBot help* for commands!";
+		input.innerHTML = Emoji_amyPC + Emoji_blueHeart + " " + "Want to check out LunaBot? Type *LunaBot help* for commands!";
 		input.dispatchEvent(evt);
 		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
 		SendButts.click();
+	}
 }
 
 function checkmsg() {
@@ -77,7 +90,7 @@ function checkmsg() {
 							buttons: 1
 							});
 						msg.dispatchEvent(clickEvt);
-						
+
 						newmsgbubble.innerHTML = "READ";
                         setTimeout(function() { engage(); }, 50);
 					}
@@ -96,7 +109,7 @@ function resp (str) {
 	console.log ("Received Message: " + str);
 	var printer = defaultmsg;
 	var interacted = 0;
-	
+
 	//Feedback
 	if (str.substring(0,8).toLowerCase() == "good bot" || str.substring(0,7).toLowerCase() == "headpat") {
 		printer += "Thanks! I'm happy to help <3";
@@ -107,7 +120,7 @@ function resp (str) {
 		badbot = badbot + 1;
 		interacted = 1;
 	}
-	
+
 	if (str.substring(0, 7).toLowerCase() == "lunabot" || str.substring(0, 4).toLowerCase() == "luna") {
 		interacted = 1;
 		if (str.substring(0, 7).toLowerCase() != "lunabot") {
@@ -126,11 +139,11 @@ function resp (str) {
 			printer += "*LunaBot ask/solve _question_*: Send WolframAlpha Query\n";
 			printer += "*LunaBot quote*: Get a random quote\n";
 			printer += "*LunaBot joke*: Laugh a bit!\n";
-			
+
 			printer += "\n\n\n_Let me know how I'm doing by replying with *good bot*/*headpat* if I did something nice, or with *bad bot*/*critique* if I did something silly._\n\n";
 			printer += "*In this update:*\n";
-			printer += "I received " + "*" + goodbot + "*" + " headpats 💙\n";
-			printer += "And " + "*" + badbot + "*" + " critiques! ❌\n\n";
+			printer += "I received " + "*" + goodbot + "*" + " headpats " + Emoji_blueHeart + "\n";
+			printer += "And " + "*" + badbot + "*" + " critiques! " + Emoji_redCross + "\n\n";
 			if (goodbot >= badbot) {
 				printer += "Yay!";
 			} else {
@@ -170,10 +183,10 @@ function resp (str) {
 			if (str == "") {
 				printer += "Tell me something to say, too!";
 			} else {
-				if (str.toLowerCase().indexOf ("mihnea") != -1 ||str.toLowerCase().indexOf ("mihneª") != -1) {
-					printer = "👩🏻‍💻💙 Nu ai voie sa te iei de Mihnea! 👺";
+				if (str.toLowerCase().indexOf ("mihnea") != -1 ||str.toLowerCase().indexOf ("mihneÂª") != -1) {
+					printer = Emoji_amyPC + Emoji_blueHeart + " Nu ai voie sa te iei de Mihnea! ??";
 				} else {
-					printer = "👩🏻‍💻💙 " + str;
+					printer = Emoji_amyPC + Emoji_blueHeart + " " + str;
 				}
 			}
 		} else if (str.substring(0, 3).toLowerCase() == "ask" || str.substring(0, 5).toLowerCase() == "solve") {
@@ -182,14 +195,15 @@ function resp (str) {
 				str = str.substring (4);
 			else
 				str = str.substring (6);
-			
+
+			var checker = str.toLowerCase();
 			var url = "https://www.wolframalpha.com/input/apiExplorer.jsp?input=" + encodeURIComponent(str) + "&format=minput,plaintext&output=JSON&type=full";
 			xmlHttp.open("GET", url, false);
 			xmlHttp.send();
 			responser = xmlHttp.responseText;
 			n = responser.indexOf("\"success\":");
 			responser = responser.substring(n + 11);
-			
+
 			if (responser.substring(0, 5) == "false") {
 				printer += "Sorry, I did not understand the question.";
 			} else {
@@ -197,16 +211,16 @@ function resp (str) {
 				var lastTitle = n;
 				while (lastTitle != -1) {
 					responser = responser.substring(n + 9);
-					
+
 					fin = responser.indexOf ("\"");
 					var title = responser.substring(0, fin);
 					if (title == "" || title == "Image" || title == "Timeline" || title == "Wikipedia page hits history" || title == "Number line" || title == "Manipulatives illustration" || title == "Illustration" || title == "Estimated current age distribution" || title == "History for births" || title == "Structure diagram" || title == "3D structure") {
-						
+
 					} else {
 						printer += "*" + title + "*";
 						printer += "\n";
 					}
-					
+
 					n = responser.indexOf("plaintext");
 					responser = responser.substring(n + 13);
 					n = responser.indexOf("\"");
@@ -218,17 +232,19 @@ function resp (str) {
 					n = responser.indexOf("title");
 					lastTitle = n;
 				}
-				
-				//printer += "\n\n";
-				//printer += "_Computed using WolframAlpha_";
 			}
+			if (printer.indexOf ("current geoIP location") != -1) {
+				printer = defaultmsg + "Oh no you don't.";
+			}
+			//printer += "\n\n";
+			//printer += "_Computed using WolframAlpha_";
 		} else if (str.substring(0, 5).toLowerCase() == "quote") {
 			xmlHttp = new XMLHttpRequest();
 			xmlHttp.open("GET", "https://talaikis.com/api/quotes/random/", false);
 			xmlHttp.send();
 			responser = xmlHttp.responseText;
 			obj = JSON.parse(responser);
-			
+
 			printer += "*Quote By*: " + obj["author"] + "\n\n";
 			printer += "_" + obj["quote"] + "_" + "\n";
 		} else if (str.substring(0, 4).toLowerCase() == "joke") {
@@ -246,7 +262,7 @@ function resp (str) {
 			xmlHttp = new XMLHttpRequest();
 			var params = '{"lang": "en", "query": "' + str + '", "sessionId": "12345", "timezone": "America/New_York"}';
 			xmlHttp.open('POST', 'https://api.dialogflow.com/v1/query', false);
-			xmlHttp.setRequestHeader("Authorization", "Bearer e7cca61131504a5487d09a15b69c13f1");
+			xmlHttp.setRequestHeader("Authorization", "Bearer 9efd8171fb104a3da2b5f99fb86b5feb");
 			xmlHttp.setRequestHeader('Content-type', 'application/json');
 			xmlHttp.send(params);
 			obj = JSON.parse(xmlHttp.responseText);
@@ -254,7 +270,7 @@ function resp (str) {
 			printer += obj["result"]["speech"];
 		}
 	}
-	
+
 	if (interacted == 1) {
 		if (printer == defaultmsg)
 			printer += str + " command not found!";
