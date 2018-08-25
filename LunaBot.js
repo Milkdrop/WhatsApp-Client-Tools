@@ -259,7 +259,8 @@ function resp (str) {
 			printer += "\n";
 			printer += "_" + obj["punchline"] + "_";
 		} else {
-			xmlHttp = new XMLHttpRequest();
+			//DIALOG FLOW
+			/*xmlHttp = new XMLHttpRequest();
 			var params = '{"lang": "en", "query": "' + str + '", "sessionId": "12345", "timezone": "America/New_York"}';
 			xmlHttp.open('POST', 'https://api.dialogflow.com/v1/query', false);
 			xmlHttp.setRequestHeader("Authorization", "Bearer 9efd8171fb104a3da2b5f99fb86b5feb");
@@ -267,7 +268,13 @@ function resp (str) {
 			xmlHttp.send(params);
 			obj = JSON.parse(xmlHttp.responseText);
 			console.log(obj["result"]);
-			printer += obj["result"]["speech"];
+			printer += obj["result"]["speech"];*/
+			
+			//CHATTERBOT MACHINE LEARNING 
+			xmlHttp = new XMLHttpRequest();
+			xmlHttp.open('GET', 'http://localhost:8080/?msg=' + encodeURIComponent(str), false);
+			xmlHttp.send();
+			printer += xmlHttp.responseText;
 		}
 	}
 
