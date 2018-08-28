@@ -13,10 +13,10 @@
 
 //GLOBALS//
 var initialized = 0;
-var freeze = 0;
 var botnet = setInterval(checkmsg, 50);
 var initer = setInterval(init, 1000);
 var bann = setInterval(annoyware, 7200000);
+var clever;
 
 var msgside;
 var Emoji_amyPC;
@@ -37,8 +37,11 @@ var obj;
 var badbot = 0;
 var goodbot = 0;
 var listening = 0;
-var smartcheck;
+var seamless = 0;
+var waitforclever = 0;
+var usedumb = 1;
 
+var debuggroupname = "LunaBot Boot Camp";
 var prefix = "!Luna";
 var jokereplies = ["Ok here's a funny one:", "Ok here's a good one:", "I don't know about this one...", "For giggles:"];
 var gotit = ["Noted!", "Got it.", "mhm", "yup", "continue", "go on", "heard you"];
@@ -55,7 +58,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v2.0* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v2.3* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
@@ -77,7 +80,7 @@ function annoyware() {
 			composer: true
 		});
 
-		input.innerHTML = Emoji_amyPC + Emoji_blueHeart + " " + "Want to check out LunaBot? Type *LunaBot help* for commands!";
+		input.innerHTML = Emoji_amyPC + Emoji_blueHeart + " " + "Want to check out LunaBot? Type *" + prefix + " help* for a list of commands!";
 		input.dispatchEvent(evt);
 		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
 		SendButts.click();
@@ -85,7 +88,7 @@ function annoyware() {
 }
 
 function checkmsg() {
-    if (initialized == 1 && freeze == 0) {
+    if (initialized == 1) {
 		children = msgside.children;
 		
 		for (i = 0; i < children.length; i++) {
@@ -94,7 +97,7 @@ function checkmsg() {
 				newmsgbubble = activity.querySelector ("div > span");
 				newmsgcount = newmsgbubble.innerHTML;
 				
-				if (newmsgcount != "READ") {
+				if (newmsgcount != "READ" && waitforclever == 0) {
 					msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
 					var clickEvt = new MouseEvent('mousedown', {
 						bubbles: true,
@@ -124,7 +127,8 @@ function engage () {
 		var previoustextr = document.querySelector ("#main > div._3zJZ2 > div > div > div._9tCEa > div.vW7d1:nth-last-child(" + prevind + ")");
 	}
 	
-	while (previoustextr.querySelector ("div.message-out") != null) { //ITERATE UNTIL WE FIND A MESSAGE THAT'S NOT THE BOT'S
+	//while (previoustextr.querySelector ("div.message-out") != null) { //ITERATE UNTIL WE FIND A MESSAGE THAT'S NOT THE BOT'S
+	while (previoustextr.innerHTML.indexOf(defaultmsg.substring(0,13)) != -1 && previoustextr.innerHTML.indexOf(prefix) != -1) {
 		prevind = prevind + 1;
 		previoustextr = document.querySelector ("#main > div._3zJZ2 > div > div > div._9tCEa > div:nth-last-child(" + prevind + ")");
 		if (previoustextr == null)
@@ -164,7 +168,7 @@ function resp (prevstr, str, chatname) {
 		interacted = 1;
 	}
 	
-	if (str.indexOf(defaultmsg.substring(0,13)) == -1) { //IF MESSAGE IS FROM THE BOT ITSELF
+	if (str.indexOf(defaultmsg.substring(0,13)) == -1 && waitforclever == 0) { //IF MESSAGE IS FROM THE BOT ITSELF
 		if (str.substring(0, prefix.length).toLowerCase() == prefix.toLowerCase()) {
 			interacted = 1;
 			str = str.substring (prefix.length + 1, 512);
@@ -192,10 +196,33 @@ function resp (prevstr, str, chatname) {
 				}
 			} else if (str.substring(0, 5).toLowerCase() == "debug") {
 				printer += "Welcome to the debugging commands list. Take care.\n\n";
+				printer += "Listening mode: ";
+				if (listening == 1) {
+					printer += "*ON*\n";
+				} else {
+					printer += "*OFF*\n";
+				}
+				
+				printer += "Seamless mode: ";
+				if (seamless == 1) {
+					printer += "*ON*\n";
+				} else {
+					printer += "*OFF*\n";
+				}
+				
+				printer += "Seamless mode type: ";
+				if (usedumb == 1) {
+					printer += "*DUMB*\n";
+				} else {
+					printer += "*SMART*\n";
+				}
+				printer += '\n';
 				printer += "*Command List:*\n";
-				printer += "*" + prefix + " Dumb*: Talk with an user-trained version of Luna! Beware.\n";
-				printer += "*" + prefix + " Listen On/Off*: Turn the Listening mode On/Off\n";
-				printer += "*" + prefix + " ChangePrefix _NewPrefix_*: Change The Prefix\n";
+				printer += "*" + prefix + " dumb*: Talk with an user-trained version of Luna! Beware.\n";
+				printer += "*" + prefix + " listen on/off*: Turn the Listening mode On/Off\n";
+				printer += "*" + prefix + " seamless on/off*: Seamless Conversation mode On/Off\n";
+				printer += "*" + prefix + " seammode dumb/smart*: Change seamless bot mode\n";
+				printer += "*" + prefix + " changePrefix _newPrefix_*: Change The Prefix\n";
 				
 			} else if (str.length == 0) { //JUST PREFIX
 				printer += awake[Math.floor(Math.random() * awake.length)];
@@ -310,35 +337,88 @@ function resp (prevstr, str, chatname) {
 				xmlHttp.send();
 				printer += xmlHttp.responseText;
 				
+				//DEBUG FEATURES START HERE
 			} else if (str.substring(0, 6).toLowerCase() == "listen") {
-				str = str.substring(7);
-				if (str.toLowerCase() == "off") {
-					if (listening == 0) {
-						printer += "LISTENING MODE. IT'S ALREADY *OFF*!";
-					} else {
-						listening = 0;
-						printer += "LISTENING MODE. OFF!";
-					}
-				} else if (str.toLowerCase() == "on") {
-					if (listening == 1) {
-						printer += "LISTENING MODE. IT'S ALREADY *ON*!";
-					} else {
-						listening = 1;
-						printer += "LISTENING MODE. ON!";
-					}
+				if (chatname != debuggroupname) {
+					printer += "Sorry, debug features are only allowed on my debug group.";
 				} else {
-					printer += "Usage: " + prefix + " Listen On/Off";
+					str = str.substring(7);
+					if (str.toLowerCase() == "off") {
+						if (listening == 0) {
+							printer += "LISTENING MODE. IT'S ALREADY *OFF*!";
+						} else {
+							listening = 0;
+							printer += "LISTENING MODE. OFF!";
+						}
+					} else if (str.toLowerCase() == "on") {
+						if (listening == 1) {
+							printer += "LISTENING MODE. IT'S ALREADY *ON*!";
+						} else {
+							listening = 1;
+							printer += "LISTENING MODE. ON!\n";
+						}
+					} else {
+						printer += "Usage: " + prefix + " listen on/off";
+					}
 				}
 				
+			} else if (str.substring(0, 8).toLowerCase() == "seamless") {
+				if (chatname != debuggroupname) {
+					printer += "Sorry, debug features are only allowed on my debug group.";
+				} else {
+					str = str.substring(9);
+					if (str.toLowerCase() == "off") {
+						if (seamless == 0) {
+							printer += "SEAMLESS MODE. IT'S ALREADY *OFF*!";
+						} else {
+							seamless = 0;
+							printer += "SEAMLESS MODE. OFF!";
+						}
+					} else if (str.toLowerCase() == "on") {
+						if (seamless == 1) {
+							printer += "SEAMLESS MODE. IT'S ALREADY *ON*!";
+						} else {
+							seamless = 1;
+							printer += "SEAMLESS MODE. ON!\n";
+						}
+					} else {
+						printer += "Usage: " + prefix + " seamless on/off";
+					}
+				}
+			}  else if (str.substring(0, 8).toLowerCase() == "seammode") {
+				if (chatname != debuggroupname) {
+					printer += "Sorry, debug features are only allowed on my debug group.";
+				} else {
+					str = str.substring(9);
+					if (str.toLowerCase() == "dumb") {
+						printer += "Seamless mode is now on DUMB MODE! Beep Boop.";
+						if (usedumb == 1) {
+							printer += "Notice: Seamless mode was already on Dumb mode.";
+						}
+						usedumb = 1;
+						
+					} else if (str.toLowerCase() == "smart") {
+						printer += "Seamless mode is now on SMART MODE! Beep Boop.";
+						if (usedumb == 0) {
+							printer += "Notice: Seamless mode was already on Smart mode!";
+						}
+						usedumb = 0;
+					} else {
+						printer += "Usage: " + prefix + " seammode dumb/smart";
+					}
+				}
 			} else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
-				str = str.substring(13);
-				if (str == "") {
-					printer += "Usage: " + prefix + " ChangePrefix _NewPrefix_";
+				if (chatname != debuggroupname) {
+					printer += "Sorry, debug features are only allowed on my debug group.";
 				} else {
-					prefix = str;
-					printer += "Prefix Changed to " + prefix;
+					str = str.substring(13);
+					if (str == "") {
+						printer += "Usage: " + prefix + " ChangePrefix _NewPrefix_";
+					} else {
+						prefix = str;
+						printer += "Prefix Changed to " + prefix;
+					}
 				}
-				
 			} else {
 				//DIALOG FLOW
 				/*xmlHttp = new XMLHttpRequest();
@@ -359,26 +439,48 @@ function resp (prevstr, str, chatname) {
 				printer += xmlHttp.responseText;*/
 				
 				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
-				smartcheck = setInterval(smart, 50);
-				freeze = 1;
-				printer = "";
+				
+				waitforclever = 1;
+				clever = setInterval(clevercheck, 100);
 			}
 			
-		} else if (listening == 1 && interacted != 1) {
+		} else if (interacted != 1) {
 			/*xmlHttp = new XMLHttpRequest();
 			printer = "";
 			xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=1' + '&chatname=' + encodeURIComponent(chatname), false);
 			xmlHttp.send();*/
 			
-			xmlHttp = new XMLHttpRequest();
-			xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-			xmlHttp.send();
-			printer = xmlHttp.responseText;
-			interacted = 1;
+			if (listening == 1) {
+				xmlHttp = new XMLHttpRequest();
+				xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=1' + '&chatname=' + encodeURIComponent(chatname), false);
+				xmlHttp.send();
+				printer = "";
+				
+				if (seamless == 1 && usedumb == 0) {
+					document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
+					
+					waitforclever = 1;
+					clever = setInterval(clevercheck, 100);
+					interacted = 1;
+				}
+			} else if (seamless == 1) {
+				if (usedumb == 0) {
+					document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
+					
+					waitforclever = 1;
+					clever = setInterval(clevercheck, 100);
+				} else {
+					xmlHttp = new XMLHttpRequest();
+					xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
+					xmlHttp.send();
+					printer = xmlHttp.responseText;
+				}
+				interacted = 1;
+			}
 		}
 	}
 	
-	if (interacted == 1) {
+	if (interacted == 1 && waitforclever == 0) {
 		if (printer == defaultmsg)
 			printer += str + " command not found!";
 
@@ -395,30 +497,40 @@ function resp (prevstr, str, chatname) {
 	}
 }
 
-function smart () {
-	var lastmsg = document.querySelector("#app > iframe").contentWindow.document.body.querySelector("#line1");
-	
-	if (lastmsg.children.length == 2) {
-		freeze = 0;
-		var printer = defaultmsg + lastmsg.innerHTML;
-		
-		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-		var evt = new InputEvent('input', {
-			bubbles: true,
-			composer: true
-		});
+function clevercheck () {
+	if (waitforclever == 1) {
+		if (document.querySelector("#app > iframe").contentWindow.cleverbot.aistate == 0) {
+			waitforclever = 0;
+			
+			var printer = "";
+			if (seamless == 0) {
+				printer = defaultmsg + document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
+			} else {
+				printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
+			}
+			var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
+			var evt = new InputEvent('input', {
+				bubbles: true,
+				composer: true
+			});
 
-		input.innerHTML = printer;
-		input.dispatchEvent(evt);
-		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
-		SendButts.click();
-		
-		clearInterval(smartcheck);
+			input.innerHTML = printer;
+			input.dispatchEvent(evt);
+			var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
+			SendButts.click();
+			
+			clearInterval(clever);
+		}
 	}
 }
 
-function sleep(ms) {
-	return new Promise(resolve => setTimeout(resolve, ms));
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
 }
 
 })();
