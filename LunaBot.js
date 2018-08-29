@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      2.4
 // @description  try to take over the world!
 // @author       You
 // @match        https://web.whatsapp.com/
@@ -39,7 +39,7 @@ var goodbot = 0;
 var listening = 0;
 var seamless = 0;
 var waitforclever = 0;
-var usedumb = 1;
+var usedumb = 0;
 
 var debuggroupname = "LunaBot Boot Camp";
 var prefix = "!Luna";
@@ -58,7 +58,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v2.3* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v2.4* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
@@ -224,6 +224,9 @@ function resp (prevstr, str, chatname) {
 				printer += "*" + prefix + " seammode dumb/smart*: Change seamless bot mode\n";
 				printer += "*" + prefix + " changePrefix _newPrefix_*: Change The Prefix\n";
 				
+				printer += "\n\n";
+				printer += "*NOTICE:* LunaBot dumb mode is down for maintenance.";
+				
 			} else if (str.length == 0) { //JUST PREFIX
 				printer += awake[Math.floor(Math.random() * awake.length)];
 				
@@ -334,8 +337,8 @@ function resp (prevstr, str, chatname) {
 				str = str.substring(5);
 				xmlHttp = new XMLHttpRequest();
 				xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-				xmlHttp.send();
-				printer += xmlHttp.responseText;
+				//xmlHttp.send();
+				//printer += xmlHttp.responseText;
 				
 				//DEBUG FEATURES START HERE
 			} else if (str.substring(0, 6).toLowerCase() == "listen") {
@@ -445,15 +448,10 @@ function resp (prevstr, str, chatname) {
 			}
 			
 		} else if (interacted != 1) {
-			/*xmlHttp = new XMLHttpRequest();
-			printer = "";
-			xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=1' + '&chatname=' + encodeURIComponent(chatname), false);
-			xmlHttp.send();*/
-			
 			if (listening == 1) {
 				xmlHttp = new XMLHttpRequest();
 				xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=1' + '&chatname=' + encodeURIComponent(chatname), false);
-				xmlHttp.send();
+				//xmlHttp.send();
 				printer = "";
 				
 				if (seamless == 1 && usedumb == 0) {
@@ -472,8 +470,8 @@ function resp (prevstr, str, chatname) {
 				} else {
 					xmlHttp = new XMLHttpRequest();
 					xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-					xmlHttp.send();
-					printer = xmlHttp.responseText;
+					//xmlHttp.send();
+					//printer = xmlHttp.responseText;
 				}
 				interacted = 1;
 			}
