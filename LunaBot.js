@@ -40,6 +40,7 @@ var listening = 0;
 var seamless = 0;
 var waitforclever = 0;
 var usedumb = 0;
+var responsechance = 20;
 
 var debuggroupname = "LunaBot Boot Camp";
 var prefix = "!Luna";
@@ -58,7 +59,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v2.4* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v2.5* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
@@ -152,7 +153,7 @@ function engage () {
 }
 
 function resp (prevstr, str, chatname) {
-	console.log ("LunaBot: [INFO] Received Message: " + str + " From Chat: " + chatname + " With Previous Message: " + prevstr);
+	//console.log ("LunaBot: [INFO] Received Message: " + str + " From Chat: " + chatname + " With Previous Message: " + prevstr);
 	
 	var printer = defaultmsg;
 	var interacted = 0;
@@ -174,8 +175,8 @@ function resp (prevstr, str, chatname) {
 			str = str.substring (prefix.length + 1, 512);
 			
 			str = str.trim();
-			if (str.substring(0, 4).toLowerCase() == "help" || str.substring(0, 4).toLowerCase() == "info") {
-				printer += "Hi there! You can talk to me by saying *" + prefix + " _message_.* If the message is a command from the list below, I will execute it.\n\n";
+			if (str.substring(0, 4).toLowerCase() == "help") {
+				printer += "Hi there! You can talk to me by saying *" + prefix + " _message_*, or simply *!message*. If the message is a command from the list below, I will execute it.\n\n";
 				printer += "*Command List:*\n";
 				printer += "*" + prefix + " ping*: Check if the LunaBot service is online.\n";
 				printer += "*" + prefix + " weather _city_*: Check weather in any city you like.\n";
@@ -183,7 +184,6 @@ function resp (prevstr, str, chatname) {
 				printer += "*" + prefix + " ask _question_*: Send WolframAlpha Query (can also solve equations)\n";
 				printer += "*" + prefix + " quote*: Get a random quote\n";
 				printer += "*" + prefix + " joke*: Laugh a bit!\n";
-				//printer += "*!Luna dumb*: Talk with an 100% user-trained Luna chatbot! Weird stuff may happen, so take care.\n";
 
 				printer += "\n\n\n_Let me know how I'm doing by replying with *good bot*/*headpat* if I did something nice, or with *bad bot*/*critique* if I did something silly._\n\n";
 				printer += "*In this update:*\n";
@@ -194,8 +194,7 @@ function resp (prevstr, str, chatname) {
 				} else {
 					printer += "Awf...";
 				}
-			} else if (str.substring(0, 5).toLowerCase() == "debug") {
-				printer += "Welcome to the debugging commands list. Take care.\n\n";
+			} else if (str.substring(0,4).toLowerCase() == "info") {
 				printer += "Listening mode: ";
 				if (listening == 1) {
 					printer += "*ON*\n";
@@ -216,16 +215,23 @@ function resp (prevstr, str, chatname) {
 				} else {
 					printer += "*SMART*\n";
 				}
-				printer += '\n';
+				
+				printer += "Random Response Chance: *" + responsechance + "%*";
+			} else if (str.substring(0, 5).toLowerCase() == "debug") {
+				printer += "Welcome to the debugging commands list. Take care.\n\n";
+				
 				printer += "*Command List:*\n";
+				printer += "*" + prefix + " info*: Display config variables.\n";
 				printer += "*" + prefix + " dumb*: Talk with an user-trained version of Luna! Beware.\n";
-				printer += "*" + prefix + " listen on/off*: Turn the Listening mode On/Off\n";
-				printer += "*" + prefix + " seamless on/off*: Seamless Conversation mode On/Off\n";
-				printer += "*" + prefix + " seammode dumb/smart*: Change seamless bot mode\n";
-				printer += "*" + prefix + " changePrefix _newPrefix_*: Change The Prefix\n";
+				//printer += "*" + prefix + " listen on/off*: Turn the Listening mode On/Off\n";
+				printer += "*" + prefix + " seamless on/off*: Seamless Conversation mode On/Off _[DEPRECATED]_\n";
+				//printer += "*" + prefix + " seammode dumb/smart*: Change seamless bot mode _[DEPRECATED]_\n";
+				printer += "*" + prefix + " responsechance _integer_*: Change the random response chance. _[WORKS ANYWHERE]_\n";
+				printer += "*" + prefix + " changeprefix _newPrefix_*: Change The Prefix\n";
 				
 				printer += "\n\n";
-				printer += "*NOTICE:* LunaBot dumb mode is down for maintenance.";
+				printer += "*NOTICE:* LunaBot dumb mode is down for maintenance.\n";
+				printer += "*NOTICE:* Seamless mode is deprecated, use random message chances.\n";
 				
 			} else if (str.length == 0) { //JUST PREFIX
 				printer += awake[Math.floor(Math.random() * awake.length)];
@@ -351,14 +357,14 @@ function resp (prevstr, str, chatname) {
 							printer += "LISTENING MODE. IT'S ALREADY *OFF*!";
 						} else {
 							listening = 0;
-							printer += "LISTENING MODE. OFF!";
+							printer += "LISTENING MODE. *OFF*!";
 						}
 					} else if (str.toLowerCase() == "on") {
 						if (listening == 1) {
 							printer += "LISTENING MODE. IT'S ALREADY *ON*!";
 						} else {
 							listening = 1;
-							printer += "LISTENING MODE. ON!\n";
+							printer += "LISTENING MODE. *ON*!\n";
 						}
 					} else {
 						printer += "Usage: " + prefix + " listen on/off";
@@ -375,14 +381,14 @@ function resp (prevstr, str, chatname) {
 							printer += "SEAMLESS MODE. IT'S ALREADY *OFF*!";
 						} else {
 							seamless = 0;
-							printer += "SEAMLESS MODE. OFF!";
+							printer += "SEAMLESS MODE. *OFF*!";
 						}
 					} else if (str.toLowerCase() == "on") {
 						if (seamless == 1) {
 							printer += "SEAMLESS MODE. IT'S ALREADY *ON*!";
 						} else {
 							seamless = 1;
-							printer += "SEAMLESS MODE. ON!\n";
+							printer += "SEAMLESS MODE. *ON*!\n";
 						}
 					} else {
 						printer += "Usage: " + prefix + " seamless on/off";
@@ -394,14 +400,14 @@ function resp (prevstr, str, chatname) {
 				} else {
 					str = str.substring(9);
 					if (str.toLowerCase() == "dumb") {
-						printer += "Seamless mode is now on DUMB MODE! Beep Boop.";
+						printer += "Seamless mode is now on *DUMB MODE*! Beep Boop.";
 						if (usedumb == 1) {
 							printer += "Notice: Seamless mode was already on Dumb mode.";
 						}
 						usedumb = 1;
 						
 					} else if (str.toLowerCase() == "smart") {
-						printer += "Seamless mode is now on SMART MODE! Beep Boop.";
+						printer += "Seamless mode is now on *SMART MODE*! Beep Boop.";
 						if (usedumb == 0) {
 							printer += "Notice: Seamless mode was already on Smart mode!";
 						}
@@ -416,10 +422,26 @@ function resp (prevstr, str, chatname) {
 				} else {
 					str = str.substring(13);
 					if (str == "") {
-						printer += "Usage: " + prefix + " ChangePrefix _NewPrefix_";
+						printer += "Usage: " + prefix + " changeprefix _NewPrefix_";
 					} else {
 						prefix = str;
-						printer += "Prefix Changed to " + prefix;
+						printer += "Prefix Changed to " + "*" + prefix + "*";
+					}
+				}
+			} else if (str.substring(0, 14).toLowerCase() == "responsechance") {
+				if (chatname != debuggroupname && false) {
+					printer += "Sorry, debug features are only allowed on my debug group.";
+				} else {
+					str = str.substring(15);
+					if (str == "" || isNaN(parseInt(str))) {
+						printer += "Usage: " + prefix + " responsechance _integer_";
+					} else {
+						responsechance = parseInt(str);
+						if (responsechance > 100)
+							responsechance = 100;
+						if (responsechance < 0)
+							responsechance = 0;
+						printer += "Random response chance is now *" + responsechance + "%*";
 					}
 				}
 			} else {
@@ -447,6 +469,12 @@ function resp (prevstr, str, chatname) {
 				clever = setInterval(clevercheck, 100);
 			}
 			
+		} else if (str.substring(0,1).toLowerCase() == "!") { //interpret as msg
+			str = str.substring(1);
+			document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
+			
+			waitforclever = 1;
+			clever = setInterval(clevercheck, 100);
 		} else if (interacted != 1) {
 			if (listening == 1) {
 				xmlHttp = new XMLHttpRequest();
@@ -473,6 +501,13 @@ function resp (prevstr, str, chatname) {
 					//xmlHttp.send();
 					//printer = xmlHttp.responseText;
 				}
+				interacted = 1;
+			} else if (Math.floor(Math.random() * 100) < responsechance) {
+				console.log ("RANDOM RESPONSE TIME!");
+				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
+					
+				waitforclever = 1;
+				clever = setInterval(clevercheck, 100);
 				interacted = 1;
 			}
 		}
@@ -502,10 +537,12 @@ function clevercheck () {
 			
 			var printer = "";
 			if (seamless == 0) {
-				printer = defaultmsg + document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
+				//printer = defaultmsg + document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
 			} else {
 				printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
 			}
+			printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
+			
 			var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 			var evt = new InputEvent('input', {
 				bubbles: true,
@@ -521,14 +558,4 @@ function clevercheck () {
 		}
 	}
 }
-
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
-}
-
 })();
