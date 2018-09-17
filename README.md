@@ -13,3 +13,6 @@ For ChatterBot Server:
 
 For SMTPspoof:
 - sudo apt install expect
+
+For SMTPspoofServer:
+- pip install cherrypy
