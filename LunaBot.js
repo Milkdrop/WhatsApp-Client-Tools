@@ -40,7 +40,9 @@ var listening = 0;
 var seamless = 0;
 var waitforclever = 0;
 var usedumb = 0;
-var responsechance = 20;
+var responsechance = 0;
+
+var lastmail = 0;
 
 var debuggroupname = "LunaBot Boot Camp";
 var prefix = "!Luna";
@@ -59,7 +61,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v2.5* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v2.6* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
@@ -182,6 +184,7 @@ function resp (prevstr, str, chatname) {
 				printer += "*" + prefix + " weather _city_*: Check weather in any city you like.\n";
 				printer += "*" + prefix + " say _something_*: Make LunaBot say anything you want! Don't be too silly tho\n";
 				printer += "*" + prefix + " ask _question_*: Send WolframAlpha Query (can also solve equations)\n";
+				printer += "*" + prefix + " sendmail from@address to@address _msg_*: Send an e-mail from any address, to any address, with any message. (I take 0 responsability for any damage done)\n";
 				printer += "*" + prefix + " quote*: Get a random quote\n";
 				printer += "*" + prefix + " joke*: Laugh a bit!\n";
 
@@ -338,6 +341,51 @@ function resp (prevstr, str, chatname) {
 				printer += "*" + obj["setup"] + "*";
 				printer += "\n";
 				printer += "_" + obj["punchline"] + "_";
+				
+			} else if (str.substring(0, 8).toLowerCase() == "sendmail") {
+				str = str.substring(9);
+				var frm = str.substring(0, str.indexOf(" "));
+				str = str.substring(str.indexOf(" ") + 1);
+				var to = str.substring(0, str.indexOf(" "));
+				str = str.substring(str.indexOf(" ") + 1);
+				var msg = str.substring(0);
+				
+				var sent = 0;
+				
+				if (frm != "" && to != "" && msg != "") {
+					if (frm.indexOf("@") != -1 && to.indexOf("@") != -1) {
+						if (Date.now() - lastmail <= 150000) {
+							if ((60 - Math.floor(((Date.now() - lastmail)/1000)%60)) >= 10) {
+								printer += "Please wait *[" + (2 - Math.floor(((Date.now() - lastmail)/1000)/60)) + ":" + (60 - Math.floor(((Date.now() - lastmail)/1000)%60)) + "]* before sending a new e-mail.";
+							} else {
+								printer += "Please wait *[" + (2 - Math.floor(((Date.now() - lastmail)/1000)/60)) + ":0" + (60 - Math.floor(((Date.now() - lastmail)/1000)%60)) + "]* before sending a new e-mail.";
+							}
+							sent = 1;
+						} else {
+							xmlHttp = new XMLHttpRequest();
+							xmlHttp.open("GET", "http://127.0.0.1:2000/?frm=" + encodeURIComponent(frm) + "&to=" + encodeURIComponent(to) + "&msg=" + encodeURIComponent(msg), false);
+							xmlHttp.send();
+							sent = 1;
+							lastmail = Date.now();
+							printer += "Mail sent!";
+						}
+					}
+				}
+				
+				if (sent == 0) {
+					printer += "Usage: " + prefix + " sendmail from@address to@address _message_";
+				}
+				
+			}  else if (str.substring(0, 3).toLowerCase() == "dex") {
+				str = str.substring(4);
+				xmlHttp = new XMLHttpRequest();
+				xmlHttp.open("GET", "https://dexonline.ro/definitie/" + encodeURIComponent(str), false);
+				xmlHttp.send();
+				var el = document.createElement( 'html' );
+				el.innerHTML = xmlHttp.responseText;
+				var def = el.querySelector("#resultsTab > div:nth-child(7) > p > span");
+				console.log (el);
+				console.log (def.innerHTML);
 				
 			} else if (str.substring(0, 4).toLowerCase() == "dumb") {
 				str = str.substring(5);
@@ -503,7 +551,6 @@ function resp (prevstr, str, chatname) {
 				}
 				interacted = 1;
 			} else if (Math.floor(Math.random() * 100) < responsechance) {
-				console.log ("RANDOM RESPONSE TIME!");
 				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
 					
 				waitforclever = 1;
