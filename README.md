@@ -10,3 +10,6 @@ For LunaBot:
 For ChatterBot Server:
 - pip install chatterbot
 - pip install cherrypy
+
+For SMTPspoof:
+- sudo apt install expect
