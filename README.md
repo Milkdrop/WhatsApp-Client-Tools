@@ -8,10 +8,11 @@ For LunaBot:
 - Also you have to manually set the Origin header as 	https://web.whatsapp.com
 
 For LunaBot Discord:
-- pip install discord
-- pip install selenium
-- pip install platform
-- pip install asyncio
+- pip3 install discord
+- pip3 install selenium
+- pip3 install platform
+- pip3 install asyncio
+(Yes, Python3 required)
 
 For ChatterBot Server:
 - pip install chatterbot
