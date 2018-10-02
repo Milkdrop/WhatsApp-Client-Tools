@@ -7,6 +7,12 @@ For LunaBot:
 - Run your browser with the following parameters: **chromium --user-data-dir="LunaBot" --disable-web-security**
 - Also you have to manually set the Origin header as 	https://web.whatsapp.com
 
+For LunaBot Discord:
+- pip install discord
+- pip install selenium
+- pip install platform
+- pip install asyncio
+
 For ChatterBot Server:
 - pip install chatterbot
 - pip install cherrypy
