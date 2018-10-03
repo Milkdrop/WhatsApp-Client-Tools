@@ -3,7 +3,7 @@ import subprocess
 
 class SRV(object):
 	def index(self, frm, to, msg):
-		subprocess.call("./smtper " + frm + " " + to + " \"" + msg + "\"",shell=True)
+		subprocess.call("expect smtper " + frm + " " + to + " \"" + msg + "\"",shell=True)
 	index.exposed = True
 	
 conf = {
