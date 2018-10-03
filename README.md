@@ -22,4 +22,5 @@ For SMTPspoof:
 - sudo apt install expect
 
 For SMTPspoofServer:
-- pip install cherrypy
+- pip3 install cherrypy
+(Yes, Python3 required)
