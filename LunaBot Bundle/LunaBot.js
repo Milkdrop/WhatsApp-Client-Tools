@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      2.4
+// @version      2.8.3
 // @description  try to take over the world!
 // @author       You
 // @match        https://web.whatsapp.com/
@@ -61,7 +61,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v2.7* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v2.8* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
@@ -348,7 +348,7 @@ function resp (prevstr, str, chatname) {
 				var to;
 				var msg;
 				
-				if (str.indexOf("From") < str.indexOf("To")) {
+				if (str.toLowerCase().indexOf("from") < str.toLowerCase().indexOf("to")) {
 					frm = str.substring(str.toLowerCase().indexOf("from:"), str.indexOf("\n")).substring(5).trim();
 					str = str.substring(str.indexOf("\n")+1);
 					to = str.substring(str.toLowerCase().indexOf("to:"), str.indexOf("\n")).substring(3).trim();
@@ -362,7 +362,12 @@ function resp (prevstr, str, chatname) {
 				
 				var sent = 0;
 				
-				if (frm != "" && to != "" && msg != "") {
+				if (frm != "" && to != "" && msg != "" && frm.indexOf(">") != -1 && to.indexOf(">") != -1) {
+					frm = frm.substring(frm.indexOf(">") + 1);
+					frm = frm.substring(0, frm.indexOf("<"));
+					to = to.substring(to.indexOf(">") + 1);
+					to = to.substring(0, to.indexOf("<"));
+					
 					if (frm.indexOf("@") != -1 && to.indexOf("@") != -1) {
 						if (Date.now() - lastmail <= 150000) {
 							if ((60 - Math.floor(((Date.now() - lastmail)/1000)%60)) >= 10) {
