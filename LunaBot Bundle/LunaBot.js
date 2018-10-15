@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      2.9
+// @version      2.9.1
 // @description  try to take over the world!
 // @author       You
 // @match        https://web.whatsapp.com/
@@ -359,16 +359,22 @@ function resp (prevstr, str, chatname) {
 					str = str.substring(str.indexOf("\n")+1);
 					frm = str.substring(str.toLowerCase().indexOf("from:"), str.indexOf("\n")).substring(5).trim();
 				}
+				
 				str = str.substring(str.indexOf("\n")+1);
 				msg = str;
 				
 				var sent = 0;
 				
-				if (frm != "" && to != "" && msg != "" && frm.indexOf(">") != -1 && to.indexOf(">") != -1) {
-					frm = frm.substring(frm.indexOf(">") + 1);
-					frm = frm.substring(0, frm.indexOf("<"));
-					to = to.substring(to.indexOf(">") + 1);
-					to = to.substring(0, to.indexOf("<"));
+				if (frm != "" && to != "" && msg != "") {
+					if (frm.indexOf("href=") != -1) {
+						frm = frm.substring(frm.indexOf(">") + 1);
+						frm = frm.substring(0, frm.indexOf("<"));
+					}
+					
+					if (to.indexOf("href=") != -1) {
+						to = to.substring(to.indexOf(">") + 1);
+						to = to.substring(0, to.indexOf("<"));
+					}
 					
 					if (frm.indexOf("@") != -1 && to.indexOf("@") != -1) {
 						if (Date.now() - lastmail <= 150000) {
