@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      2.8.3
+// @version      2.9
 // @description  try to take over the world!
 // @author       You
 // @match        https://web.whatsapp.com/
@@ -31,7 +31,6 @@ var activity;
 var newmsgbubble;
 var newmsgcount;
 var msg;
-var xmlHttp;
 var responser;
 var obj;
 var badbot = 0;
@@ -50,6 +49,10 @@ var jokereplies = ["Ok here's a funny one:", "Ok here's a good one:", "I don't k
 var gotit = ["Noted!", "Got it.", "mhm", "yup", "continue", "go on", "heard you"];
 var awake = ["Yes?", "I'm here", "Listening"];
 
+var InputMsgEvent;
+var ClickEvent;
+var GeneralXMLHTTPRequest;
+
 function init() {
 	if(document.getElementsByClassName("app-wrapper-web bFqKf")[0] != null && initialized == 0){
 		msgside = document.querySelector("#side > div._1vDUw > div > div > div");
@@ -61,8 +64,22 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v2.8* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v2.9* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
+		GeneralXMLHTTPRequest = new XMLHttpRequest();
+		
+		InputMsgEvent = new InputEvent('input', {
+			bubbles: true,
+			composer: true
+		});
+		
+		ClickEvent = new MouseEvent('mousedown', {
+			bubbles: true,
+			composed: true,
+			button: 0,
+			buttons: 1
+		});
+						
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
         ifrm.setAttribute("src", "https://www.cleverbot.com/");
@@ -78,13 +95,8 @@ function init() {
 function annoyware() {
 	if (initialized == 1) {
 		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-		var evt = new InputEvent('input', {
-			bubbles: true,
-			composer: true
-		});
-
 		input.innerHTML = Emoji_amyPC + Emoji_blueHeart + " " + "Want to check out LunaBot? Type *" + prefix + " help* for a list of commands!";
-		input.dispatchEvent(evt);
+		input.dispatchEvent(InputMsgEvent);
 		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
 		SendButts.click();
 	}
@@ -102,13 +114,7 @@ function checkmsg() {
 				
 				if (newmsgcount != "READ" && waitforclever == 0) {
 					msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
-					var clickEvt = new MouseEvent('mousedown', {
-						bubbles: true,
-						composed: true,
-						button: 0,
-						buttons: 1
-						});
-					msg.dispatchEvent(clickEvt);
+					msg.dispatchEvent(ClickEvent);
 					
 					newmsgbubble.innerHTML = "READ";
                     setTimeout(function() { engage(); }, 50);
@@ -250,10 +256,9 @@ function resp (prevstr, str, chatname) {
 				if (str.length == 0) {
 					printer += "Usage: " + prefix + " weather City";
 				} else {
-					xmlHttp = new XMLHttpRequest();
-					xmlHttp.open("GET", "https://cors-anywhere.herokuapp.com/https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
-					xmlHttp.send();
-					responser = xmlHttp.responseText;
+					GeneralXMLHTTPRequest.open("GET", "https://cors-anywhere.herokuapp.com/https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
+					GeneralXMLHTTPRequest.send();
+					responser = GeneralXMLHTTPRequest.responseText;
 					if (responser.indexOf ("Ai stricat pagina,") != -1) {
 						printer += "Could not find " + str + " city.";
 					} else {
@@ -276,14 +281,13 @@ function resp (prevstr, str, chatname) {
 				}
 				
 			} else if (str.substring(0, 3).toLowerCase() == "ask") {
-				xmlHttp = new XMLHttpRequest();
 				str = str.substring (4);
 
 				var checker = str.toLowerCase();
 				var url = "https://www.wolframalpha.com/input/apiExplorer.jsp?input=" + encodeURIComponent(str) + "&format=minput,plaintext&output=JSON&type=full";
-				xmlHttp.open("GET", url, false);
-				xmlHttp.send();
-				responser = xmlHttp.responseText;
+				GeneralXMLHTTPRequest.open("GET", url, false);
+				GeneralXMLHTTPRequest.send();
+				responser = GeneralXMLHTTPRequest.responseText;
 				n = responser.indexOf("\"success\":");
 				responser = responser.substring(n + 11);
 
@@ -307,7 +311,7 @@ function resp (prevstr, str, chatname) {
 						n = responser.indexOf("plaintext");
 						responser = responser.substring(n + 13);
 						n = responser.indexOf("\"");
-						var wolfmsg = responser.substring(0, n).replace(new RegExp("\\\\n", 'g'), "\n");
+						var wolfmsg = responser.substring(0, n).replace(RegExp("\\\\n", 'g'), "\n");
 						if (wolfmsg != "") {
 							printer += wolfmsg;
 							printer += "\n\n";
@@ -321,20 +325,18 @@ function resp (prevstr, str, chatname) {
 				}
 				
 			} else if (str.substring(0, 5).toLowerCase() == "quote") {
-				xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("GET", "https://talaikis.com/api/quotes/random/", false);
-				xmlHttp.send();
-				responser = xmlHttp.responseText;
+				GeneralXMLHTTPRequest.open("GET", "https://talaikis.com/api/quotes/random/", false);
+				GeneralXMLHTTPRequest.send();
+				responser = GeneralXMLHTTPRequest.responseText;
 				obj = JSON.parse(responser);
 
 				printer += "*Quote By*: " + obj["author"] + "\n\n";
 				printer += "_" + obj["quote"] + "_" + "\n";
 				
 			} else if (str.substring(0, 4).toLowerCase() == "joke") {
-				xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("GET", "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke", false);
-				xmlHttp.send();
-				responser = xmlHttp.responseText;
+				GeneralXMLHTTPRequest.open("GET", "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke", false);
+				GeneralXMLHTTPRequest.send();
+				responser = GeneralXMLHTTPRequest.responseText;
 				obj = JSON.parse(responser);
 				printer += jokereplies[Math.floor(Math.random() * jokereplies.length)];
 				printer += "\n\n";
@@ -377,9 +379,8 @@ function resp (prevstr, str, chatname) {
 							}
 							sent = 1;
 						} else {
-							xmlHttp = new XMLHttpRequest();
-							xmlHttp.open("GET", "http://127.0.0.1:2000/?frm=" + encodeURIComponent(frm) + "&to=" + encodeURIComponent(to) + "&msg=" + encodeURIComponent(msg), false);
-							xmlHttp.send();
+							GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?frm=" + encodeURIComponent(frm) + "&to=" + encodeURIComponent(to) + "&msg=" + encodeURIComponent(msg), false);
+							GeneralXMLHTTPRequest.send();
 							sent = 1;
 							lastmail = Date.now();
 							printer += "Mail sent!\n\nFrom: *" + frm + "*\n" + "To: *" + to + "*";
@@ -393,20 +394,18 @@ function resp (prevstr, str, chatname) {
 				
 			}  else if (str.substring(0, 3).toLowerCase() == "dex") {
 				str = str.substring(4);
-				xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("GET", "https://dexonline.ro/definitie/" + encodeURIComponent(str), false);
-				xmlHttp.send();
+				GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/definitie/" + encodeURIComponent(str), false);
+				GeneralXMLHTTPRequest.send();
 				var el = document.createElement( 'html' );
-				el.innerHTML = xmlHttp.responseText;
+				el.innerHTML = GeneralXMLHTTPRequest.responseText;
 				var def = el.querySelector("#resultsTab > div:nth-child(7) > p > span");
 				
 				
 			} else if (str.substring(0, 4).toLowerCase() == "dumb") {
 				str = str.substring(5);
-				xmlHttp = new XMLHttpRequest();
-				xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-				//xmlHttp.send();
-				//printer += xmlHttp.responseText;
+				GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
+				//GeneralXMLHTTPRequest.send();
+				//printer += GeneralXMLHTTPRequest.responseText;
 				
 				//DEBUG FEATURES START HERE
 			} else if (str.substring(0, 6).toLowerCase() == "listen") {
@@ -508,22 +507,22 @@ function resp (prevstr, str, chatname) {
 				}
 			} else {
 				//DIALOG FLOW
-				/*xmlHttp = new XMLHttpRequest();
+				/*GeneralXMLHTTPRequest = new XMLHttpRequest();
 				var params = '{"lang": "en", "query": "' + str + '", "sessionId": "12345", "timezone": "America/New_York"}';
-				xmlHttp.open('POST', 'https://api.dialogflow.com/v1/query', false);
-				xmlHttp.setRequestHeader("Authorization", "Bearer 9efd8171fb104a3da2b5f99fb86b5feb");
-				xmlHttp.setRequestHeader('Content-type', 'application/json');
-				xmlHttp.send(params);
-				obj = JSON.parse(xmlHttp.responseText);
+				GeneralXMLHTTPRequest.open('POST', 'https://api.dialogflow.com/v1/query', false);
+				GeneralXMLHTTPRequest.setRequestHeader("Authorization", "Bearer 9efd8171fb104a3da2b5f99fb86b5feb");
+				GeneralXMLHTTPRequest.setRequestHeader('Content-type', 'application/json');
+				GeneralXMLHTTPRequest.send(params);
+				obj = JSON.parse(GeneralXMLHTTPRequest.responseText);
 				console.log(obj["result"]);
 				printer += obj["result"]["speech"];*/
 
 				/*//CHATTERBOT MACHINE LEARNING
-				xmlHttp = new XMLHttpRequest();
-				//xmlHttp.timeout = 10000;
-				xmlHttp.open('GET', 'http://192.168.1.106:8080/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-				xmlHttp.send();
-				printer += xmlHttp.responseText;*/
+				GeneralXMLHTTPRequest = new XMLHttpRequest();
+				//GeneralXMLHTTPRequest.timeout = 10000;
+				GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8080/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
+				GeneralXMLHTTPRequest.send();
+				printer += GeneralXMLHTTPRequest.responseText;*/
 				
 				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
 				
@@ -539,9 +538,8 @@ function resp (prevstr, str, chatname) {
 			clever = setInterval(clevercheck, 100);
 		} else if (interacted != 1) {
 			if (listening == 1) {
-				xmlHttp = new XMLHttpRequest();
-				xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=1' + '&chatname=' + encodeURIComponent(chatname), false);
-				//xmlHttp.send();
+				GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=1' + '&chatname=' + encodeURIComponent(chatname), false);
+				//GeneralXMLHTTPRequest.send();
 				printer = "";
 				
 				if (seamless == 1 && usedumb == 0) {
@@ -558,10 +556,9 @@ function resp (prevstr, str, chatname) {
 					waitforclever = 1;
 					clever = setInterval(clevercheck, 100);
 				} else {
-					xmlHttp = new XMLHttpRequest();
-					xmlHttp.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-					//xmlHttp.send();
-					//printer = xmlHttp.responseText;
+					GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
+					//GeneralXMLHTTPRequest.send();
+					//printer = GeneralXMLHTTPRequest.responseText;
 				}
 				interacted = 1;
 			} else if (Math.floor(Math.random() * 100) < responsechance) {
@@ -579,13 +576,8 @@ function resp (prevstr, str, chatname) {
 			printer += str + " command not found!";
 
 		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-		var evt = new InputEvent('input', {
-			bubbles: true,
-			composer: true
-		});
-
 		input.innerHTML = printer;
-		input.dispatchEvent(evt);
+		input.dispatchEvent(InputMsgEvent);
 		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
 		SendButts.click();
 	}
@@ -605,13 +597,9 @@ function clevercheck () {
 			printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
 			
 			var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-			var evt = new InputEvent('input', {
-				bubbles: true,
-				composer: true
-			});
 
 			input.innerHTML = printer;
-			input.dispatchEvent(evt);
+			input.dispatchEvent(InputMsgEvent);
 			var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
 			SendButts.click();
 			
