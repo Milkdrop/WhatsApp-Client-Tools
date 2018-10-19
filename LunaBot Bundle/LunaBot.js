@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      2.9.1
-// @description  try to take over the world!
-// @author       You
+// @version      3.0
+// @description  A funky bot
+// @author       Loona
 // @match        https://web.whatsapp.com/
 // @grant        none
 // ==/UserScript==
@@ -15,7 +15,7 @@
 var initialized = 0;
 var botnet = setInterval(checkmsg, 50);
 var initer = setInterval(init, 1000);
-var bann = setInterval(annoyware, 7200000);
+var bann = setInterval(refresher, 21600000);
 var clever;
 
 var msgside;
@@ -39,7 +39,7 @@ var listening = 0;
 var seamless = 0;
 var waitforclever = 0;
 var usedumb = 0;
-var responsechance = 5;
+var responsechance = 3;
 
 var lastmail = 0;
 
@@ -64,7 +64,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v2.9* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v3.0* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		GeneralXMLHTTPRequest = new XMLHttpRequest();
 		
@@ -92,13 +92,14 @@ function init() {
 	}
 }
 
-function annoyware() {
+function refresher() {
 	if (initialized == 1) {
-		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
+		document.location.reload();
+		/*var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 		input.innerHTML = Emoji_amyPC + Emoji_blueHeart + " " + "Want to check out LunaBot? Type *" + prefix + " help* for a list of commands!";
 		input.dispatchEvent(InputMsgEvent);
 		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
-		SendButts.click();
+		SendButts.click();*/
 	}
 }
 
@@ -350,7 +351,7 @@ function resp (prevstr, str, chatname) {
 				var to;
 				var msg;
 				
-				if (str.toLowerCase().indexOf("from") < str.toLowerCase().indexOf("to")) {
+				if (str.toLowerCase().indexOf("from:") < str.toLowerCase().indexOf("to:")) {
 					frm = str.substring(str.toLowerCase().indexOf("from:"), str.indexOf("\n")).substring(5).trim();
 					str = str.substring(str.indexOf("\n")+1);
 					to = str.substring(str.toLowerCase().indexOf("to:"), str.indexOf("\n")).substring(3).trim();
@@ -364,7 +365,6 @@ function resp (prevstr, str, chatname) {
 				msg = str;
 				
 				var sent = 0;
-				
 				if (frm != "" && to != "" && msg != "") {
 					if (frm.indexOf("href=") != -1) {
 						frm = frm.substring(frm.indexOf(">") + 1);
@@ -376,6 +376,8 @@ function resp (prevstr, str, chatname) {
 						to = to.substring(0, to.indexOf("<"));
 					}
 					
+					console.log(frm);
+					console.log(to);
 					if (frm.indexOf("@") != -1 && to.indexOf("@") != -1) {
 						if (Date.now() - lastmail <= 150000) {
 							if ((60 - Math.floor(((Date.now() - lastmail)/1000)%60)) >= 10) {
