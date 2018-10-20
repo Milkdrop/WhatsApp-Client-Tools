@@ -489,12 +489,14 @@ function resp (prevstr, str, chatname) {
 						
 						for (var i = 0; i < word.length; i++)
 							printer += "_ ";
+					} else {
+						printer += "There's already an on-going Hangman Session. Type *" + prefix + " hangman reset* to reset it.";
 					}
 				} else if (str.toLowerCase() == "reset") {
 					hangman[chatname] = null;
 					printer += "The current Hangman Session has been reset! Type *" + prefix + " hangman EN / RO* to choose a new word.";
 				} else {
-					printer += "Please Choose either *EN* (English) or *RO* (Romanian): *" + prefix + " hangman EN / RO*";
+					printer += "Please Choose either *EN* (English) or *RO* (Romanian):\n*" + prefix + " hangman EN / RO*";
 				}
 				
 			} else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
@@ -598,7 +600,7 @@ function resp (prevstr, str, chatname) {
 					if (word == word.toUpperCase()) {
 						printer += "Congratulations! Word is:\n";
 						printer += "*" + word + "*";
-						hangman[chatname].word = null;
+						hangman[chatname] = null;
 					} else {
 						var badguesses = 0;
 						
