@@ -12,6 +12,7 @@ For LunaBot Discord:
 - pip3 install selenium
 - pip3 install platform
 - pip3 install asyncio
+
 (Yes, Python3 required)
 
 For ChatterBot Server:
@@ -23,4 +24,5 @@ For SMTPspoof:
 
 For SMTPspoofServer:
 - pip3 install cherrypy
+
 (Yes, Python3 required)
