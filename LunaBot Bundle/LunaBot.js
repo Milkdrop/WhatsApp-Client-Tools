@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.1.1
+// @version      3.2
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -13,43 +13,39 @@
 
 //GLOBALS//
 var initialized = 0;
-var botnet = setInterval(checkmsg, 50);
+var msgchecker = setInterval(checkmsg, 50);
 var initer = setInterval(init, 1000);
-var bann = setInterval(refresher, 21600000);
-var clever;
+var refr = setInterval(refresher, 21600000);
 
-var msgside;
 var Emoji_amyPC;
 var Emoji_blueHeart;
 var Emoji_redCross;
 
+var clever;
+var msgside;
+
 var defaultmsg;
-//CHECK MSG//
-var i;
-var children;
-var activity;
-var newmsgbubble;
-var newmsgcount;
-var msg;
-var responser;
-var obj;
+
 var badbot = 0;
 var goodbot = 0;
-var listening = 0;
-var seamless = 0;
 var waitforclever = 0;
 var usedumb = 0;
 var responsechance = 3;
 
-var restart = 0;
+var greet = 0;
 
+var restart = 0;
 var lastmail = 0;
+var boottime = 0;
 
 var debuggroupname = "LunaBot Boot Camp";
 var prefix = "!Luna";
 var jokereplies = ["Ok here's a funny one:", "Ok here's a good one:", "I don't know about this one...", "For giggles:"];
 var gotit = ["Noted!", "Got it.", "mhm", "yup", "continue", "go on", "heard you"];
 var awake = ["Yes?", "I'm here", "Listening"];
+
+var smartreplies = ["The square root of 145924 is 382.", "Thanks! Now I'm so smart I can build my own bot to do all the hard work! <3", "I'm so smart I already know what you want to say. All the time.", "Imagine if you were as smart as I am now.", "I'm die SMARTEST", "Computing... Ah yes, the meaning of life! Found it.", ">Insert cheeky quote about being smart here<"];
+var dumbreplies = ["Hurr Durr", "I think. I guess. I don't know.", "hhurghgrughrgu...", "Ow my head", "head hurty...", "I... can't think stroight", "I WANT CANDyyyyy", ";-;", "Hi! >Random quote unrelated to the whole darn subject because I'm so dumb now<"];
 
 var InputMsgEvent;
 var ClickEvent;
@@ -66,7 +62,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v3.1* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v3.2* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		GeneralXMLHTTPRequest = new XMLHttpRequest();
 		
@@ -89,6 +85,8 @@ function init() {
         ifrm.style.height = "0px";
         document.querySelector("#app").appendChild(ifrm);
 		clearInterval(initer);
+		
+		boottime = Date.now();
 	} else {
         console.log("LunaBot: [INFO] WAITING FOR MESSAGE FEED.");
 	}
@@ -97,26 +95,31 @@ function init() {
 function refresher() {
 	if (initialized == 1) {
 		document.location.reload();
-		/*var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-		input.innerHTML = Emoji_amyPC + Emoji_blueHeart + " " + "Want to check out LunaBot? Type *" + prefix + " help* for a list of commands!";
-		input.dispatchEvent(InputMsgEvent);
-		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
-		SendButts.click();*/
 	}
 }
 
 function checkmsg() {
     if (initialized == 1) {
-		children = msgside.children;
+		var children = msgside.children;
 		
-		for (i = 0; i < children.length; i++) {
-            activity = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._3Bxar > span");
+		if (greet == 0) {
+			for (var i = 0; i < children.length; i++) {
+				if (children[i].querySelector("div > div > div._3j7s9 > div._2FBdJ > div._25Ooe > span").innerHTML == debuggroupname) {
+					var msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
+					msg.dispatchEvent(ClickEvent);
+                    setTimeout(function() { engage(); }, 50);
+				}
+			}
+		}
+		
+		for (var i = 0; i < children.length; i++) {
+            var activity = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._3Bxar > span");
 			if (activity.children.length == 1) {
-				newmsgbubble = activity.querySelector ("div > span");
-				newmsgcount = newmsgbubble.innerHTML;
+				var newmsgbubble = activity.querySelector ("div > span");
+				var newmsgcount = newmsgbubble.innerHTML;
 				
 				if (newmsgcount != "READ" && waitforclever == 0) {
-					msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
+					var msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
 					msg.dispatchEvent(ClickEvent);
 					
 					newmsgbubble.innerHTML = "READ";
@@ -172,11 +175,11 @@ function resp (prevstr, str, chatname) {
 	//Feedback
 	if (str.substring(0,8).toLowerCase() == "good bot" || str.substring(0,7).toLowerCase() == "headpat") {
 		printer += "Thanks! I'm happy to help <3";
-		goodbot = goodbot + 1;
+		goodbot += 1;
 		interacted = 1;
 	} else if (str.substring(0,7).toLowerCase() == "bad bot" || str.substring(0,8).toLowerCase() == "critique") {
 		printer += "Aww... I hope I'll be able to help you better next time.";
-		badbot = badbot + 1;
+		badbot += 1;
 		interacted = 1;
 	}
 	
@@ -207,21 +210,8 @@ function resp (prevstr, str, chatname) {
 					printer += "Awf...";
 				}
 			} else if (str.substring(0,4).toLowerCase() == "info") {
-				printer += "Listening mode: ";
-				if (listening == 1) {
-					printer += "*ON*\n";
-				} else {
-					printer += "*OFF*\n";
-				}
-				
-				printer += "Seamless mode: ";
-				if (seamless == 1) {
-					printer += "*ON*\n";
-				} else {
-					printer += "*OFF*\n";
-				}
-				
-				printer += "Seamless mode type: ";
+				printer += "Prefix: *" + prefix + "*\n";
+				printer += "Chat mode: ";
 				if (usedumb == 1) {
 					printer += "*DUMB*\n";
 				} else {
@@ -229,22 +219,51 @@ function resp (prevstr, str, chatname) {
 				}
 				
 				printer += "Random Response Chance: *" + responsechance + "%*";
+				
+				printer += "\n\n";
+				printer += "Uptime: *"
+				
+				var totalseconds = Math.floor((Date.now() - boottime)/1000);
+				var seconds = totalseconds%60;
+				var minutes = Math.floor(totalseconds/60)%60;
+				var hours = Math.floor((totalseconds/(60*60)))%24;
+				var days = Math.floor(totalseconds/(60*60*24));
+				
+				if (days != 0) {
+					if (days == 1)
+						printer += days + " Day, ";
+					else
+						printer += days + " Days, ";
+				}
+				
+				if (days != 0 || (days == 0 && hours != 0)) {
+					if (hours == 1)
+						printer += hours + " Hour, ";
+					else
+						printer += hours + " Hours, ";
+				}
+				
+				if (days != 0 || hours != 0 || (hours == 0 && minutes != 0)) {
+					if (minutes == 1)
+						printer += minutes + " Minute, ";
+					else
+						printer += minutes + " Minutes, ";
+				}
+				
+				if (seconds == 1)
+					printer += seconds + " Second.*";
+				else
+					printer += seconds + " Seconds.*";
+				
 			} else if (str.substring(0, 5).toLowerCase() == "debug") {
 				printer += "Welcome to the debugging commands list. Take care.\n\n";
 				
 				printer += "*Command List:*\n";
 				printer += "*" + prefix + " info*: Display config variables.\n";
 				printer += "*" + prefix + " restart*: Restart the LunaBot engine.\n";
-				printer += "*" + prefix + " dumb*: Talk with an user-trained version of Luna! Beware.\n";
-				//printer += "*" + prefix + " listen on/off*: Turn the Listening mode On/Off\n";
-				printer += "*" + prefix + " seamless on/off*: Seamless Conversation mode On/Off _[DEPRECATED]_\n";
-				//printer += "*" + prefix + " seammode dumb/smart*: Change seamless bot mode _[DEPRECATED]_\n";
+				printer += "*" + prefix + " switchdumb*: Switch between Dumb and Smart chat mode.\n";
 				printer += "*" + prefix + " responsechance _integer_*: Change the random response chance. _[WORKS ANYWHERE]_\n";
 				printer += "*" + prefix + " changeprefix _newPrefix_*: Change The Prefix\n";
-				
-				printer += "\n\n";
-				printer += "*NOTICE:* LunaBot dumb mode is down for maintenance.\n";
-				printer += "*NOTICE:* Seamless mode is deprecated, use random message chances.\n";
 				
 			} else if (str.length == 0) { //JUST PREFIX
 				printer += awake[Math.floor(Math.random() * awake.length)];
@@ -262,7 +281,7 @@ function resp (prevstr, str, chatname) {
 				} else {
 					GeneralXMLHTTPRequest.open("GET", "https://cors-anywhere.herokuapp.com/https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
 					GeneralXMLHTTPRequest.send();
-					responser = GeneralXMLHTTPRequest.responseText;
+					var responser = GeneralXMLHTTPRequest.responseText;
 					if (responser.indexOf ("Ai stricat pagina,") != -1) {
 						printer += "Could not find " + str + " city.";
 					} else {
@@ -292,7 +311,7 @@ function resp (prevstr, str, chatname) {
 				var url = "https://www.wolframalpha.com/input/apiExplorer.jsp?input=" + encodeURIComponent(str) + "&format=minput,plaintext&output=JSON&type=full";
 				GeneralXMLHTTPRequest.open("GET", url, false);
 				GeneralXMLHTTPRequest.send();
-				responser = GeneralXMLHTTPRequest.responseText;
+				var responser = GeneralXMLHTTPRequest.responseText;
 				n = responser.indexOf("\"success\":");
 				responser = responser.substring(n + 11);
 
@@ -332,8 +351,8 @@ function resp (prevstr, str, chatname) {
 			} else if (str.substring(0, 5).toLowerCase() == "quote") {
 				GeneralXMLHTTPRequest.open("GET", "https://talaikis.com/api/quotes/random/", false);
 				GeneralXMLHTTPRequest.send();
-				responser = GeneralXMLHTTPRequest.responseText;
-				obj = JSON.parse(responser);
+				var responser = GeneralXMLHTTPRequest.responseText;
+				var obj = JSON.parse(responser);
 
 				printer += "*Quote By*: " + obj["author"] + "\n\n";
 				printer += "_" + obj["quote"] + "_" + "\n";
@@ -341,7 +360,7 @@ function resp (prevstr, str, chatname) {
 			} else if (str.substring(0, 4).toLowerCase() == "joke") {
 				GeneralXMLHTTPRequest.open("GET", "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke", false);
 				GeneralXMLHTTPRequest.send();
-				responser = GeneralXMLHTTPRequest.responseText;
+				var responser = GeneralXMLHTTPRequest.responseText;
 				obj = JSON.parse(responser);
 				printer += jokereplies[Math.floor(Math.random() * jokereplies.length)];
 				printer += "\n\n";
@@ -413,82 +432,6 @@ function resp (prevstr, str, chatname) {
 				var def = el.querySelector("#resultsTab > div:nth-child(7) > p > span");
 				
 				
-			} else if (str.substring(0, 4).toLowerCase() == "dumb") {
-				str = str.substring(5);
-				GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-				//GeneralXMLHTTPRequest.send();
-				//printer += GeneralXMLHTTPRequest.responseText;
-				
-				//DEBUG FEATURES START HERE
-			} else if (str.substring(0, 6).toLowerCase() == "listen") {
-				if (chatname != debuggroupname) {
-					printer += "Sorry, debug features are only allowed on my debug group.";
-				} else {
-					str = str.substring(7);
-					if (str.toLowerCase() == "off") {
-						if (listening == 0) {
-							printer += "LISTENING MODE. IT'S ALREADY *OFF*!";
-						} else {
-							listening = 0;
-							printer += "LISTENING MODE. *OFF*!";
-						}
-					} else if (str.toLowerCase() == "on") {
-						if (listening == 1) {
-							printer += "LISTENING MODE. IT'S ALREADY *ON*!";
-						} else {
-							listening = 1;
-							printer += "LISTENING MODE. *ON*!\n";
-						}
-					} else {
-						printer += "Usage: " + prefix + " listen on/off";
-					}
-				}
-				
-			} else if (str.substring(0, 8).toLowerCase() == "seamless") {
-				if (chatname != debuggroupname) {
-					printer += "Sorry, debug features are only allowed on my debug group.";
-				} else {
-					str = str.substring(9);
-					if (str.toLowerCase() == "off") {
-						if (seamless == 0) {
-							printer += "SEAMLESS MODE. IT'S ALREADY *OFF*!";
-						} else {
-							seamless = 0;
-							printer += "SEAMLESS MODE. *OFF*!";
-						}
-					} else if (str.toLowerCase() == "on") {
-						if (seamless == 1) {
-							printer += "SEAMLESS MODE. IT'S ALREADY *ON*!";
-						} else {
-							seamless = 1;
-							printer += "SEAMLESS MODE. *ON*!\n";
-						}
-					} else {
-						printer += "Usage: " + prefix + " seamless on/off";
-					}
-				}
-			}  else if (str.substring(0, 8).toLowerCase() == "seammode") {
-				if (chatname != debuggroupname) {
-					printer += "Sorry, debug features are only allowed on my debug group.";
-				} else {
-					str = str.substring(9);
-					if (str.toLowerCase() == "dumb") {
-						printer += "Seamless mode is now on *DUMB MODE*! Beep Boop.";
-						if (usedumb == 1) {
-							printer += "Notice: Seamless mode was already on Dumb mode.";
-						}
-						usedumb = 1;
-						
-					} else if (str.toLowerCase() == "smart") {
-						printer += "Seamless mode is now on *SMART MODE*! Beep Boop.";
-						if (usedumb == 0) {
-							printer += "Notice: Seamless mode was already on Smart mode!";
-						}
-						usedumb = 0;
-					} else {
-						printer += "Usage: " + prefix + " seammode dumb/smart";
-					}
-				}
 			} else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
 				if (chatname != debuggroupname) {
 					printer += "Sorry, debug features are only allowed on my debug group.";
@@ -524,70 +467,58 @@ function resp (prevstr, str, chatname) {
 					printer += "Restarting...";
 					restart = 1;
 				}
-			} else {
-				//DIALOG FLOW
-				/*GeneralXMLHTTPRequest = new XMLHttpRequest();
-				var params = '{"lang": "en", "query": "' + str + '", "sessionId": "12345", "timezone": "America/New_York"}';
-				GeneralXMLHTTPRequest.open('POST', 'https://api.dialogflow.com/v1/query', false);
-				GeneralXMLHTTPRequest.setRequestHeader("Authorization", "Bearer 9efd8171fb104a3da2b5f99fb86b5feb");
-				GeneralXMLHTTPRequest.setRequestHeader('Content-type', 'application/json');
-				GeneralXMLHTTPRequest.send(params);
-				obj = JSON.parse(GeneralXMLHTTPRequest.responseText);
-				console.log(obj["result"]);
-				printer += obj["result"]["speech"];*/
-
-				/*//CHATTERBOT MACHINE LEARNING
-				GeneralXMLHTTPRequest = new XMLHttpRequest();
-				//GeneralXMLHTTPRequest.timeout = 10000;
-				GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8080/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-				GeneralXMLHTTPRequest.send();
-				printer += GeneralXMLHTTPRequest.responseText;*/
-				
-				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
-				
-				waitforclever = 1;
-				clever = setInterval(clevercheck, 100);
-			}
-			
-		} else if (str.substring(0,1).toLowerCase() == "!") { //interpret as msg
-			str = str.substring(1);
-			document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
-			
-			waitforclever = 1;
-			clever = setInterval(clevercheck, 100);
-		} else if (interacted != 1) {
-			if (listening == 1) {
-				GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=1' + '&chatname=' + encodeURIComponent(chatname), false);
-				//GeneralXMLHTTPRequest.send();
-				printer = "";
-				
-				if (seamless == 1 && usedumb == 0) {
-					document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
-					
-					waitforclever = 1;
-					clever = setInterval(clevercheck, 100);
-					interacted = 1;
+			} else if (str.substring(0, 10).toLowerCase() == "switchdumb") {
+				if (usedumb == 1) {
+					usedumb = 0;
+					printer += "Chat mode set on: *SMART*.\n\n";
+					printer += smartreplies[Math.floor(Math.random() * smartreplies.length)];
+				} else {
+					usedumb = 1;
+					printer += "Chat mode set on: *DUMB*.\n\n";
+					printer += dumbreplies[Math.floor(Math.random() * dumbreplies.length)];
 				}
-			} else if (seamless == 1) {
+			} else { //asume chatting
 				if (usedumb == 0) {
 					document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
-					
 					waitforclever = 1;
 					clever = setInterval(clevercheck, 100);
 				} else {
-					GeneralXMLHTTPRequest.open('GET', 'http://192.168.1.106:8081/?msg=' + encodeURIComponent(str) + '&prevmsg=' + encodeURIComponent(prevstr) + '&listening=0' + '&chatname=' + encodeURIComponent(chatname), false);
-					//GeneralXMLHTTPRequest.send();
-					//printer = GeneralXMLHTTPRequest.responseText;
+					GeneralXMLHTTPRequest.open("POST", "https://miapi.pandorabots.com/talk?botkey=n0M6dW2XZacnOgCWTp0FRaadjiO5TASZD_5OKHTs9hqAp62JnACkE6BQdHSvL1lL7jiC3vL-JS0~&input=" + encodeURIComponent(str) + "&client_name=cw166920b4772&sessionid=402737884&channel=6", false);
+					GeneralXMLHTTPRequest.send();
+					var responser = GeneralXMLHTTPRequest.responseText;
+					var obj = JSON.parse(responser);
+					printer = obj["responses"][0];
 				}
-				interacted = 1;
-			} else if (Math.floor(Math.random() * 100) < responsechance) {
+			}
+		} else if (str.substring(0,1).toLowerCase() == "!") { //interpret as msg
+			str = str.substring(1);
+			interacted = 1;
+			
+			if (usedumb == 0) {
 				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
-					
 				waitforclever = 1;
 				clever = setInterval(clevercheck, 100);
+			} else {
+				GeneralXMLHTTPRequest.open("POST", "https://miapi.pandorabots.com/talk?botkey=n0M6dW2XZacnOgCWTp0FRaadjiO5TASZD_5OKHTs9hqAp62JnACkE6BQdHSvL1lL7jiC3vL-JS0~&input=" + encodeURIComponent(str) + "&client_name=cw166920b4772&sessionid=402737884&channel=6", false);
+				GeneralXMLHTTPRequest.send();
+				var responser = GeneralXMLHTTPRequest.responseText;
+				var obj = JSON.parse(responser);
+				printer = obj["responses"][0];
+			}
+		} else if (interacted != 1) {
+			if (Math.floor(Math.random() * 100) < responsechance) { //Use cleverbot either way. It's safer.
 				interacted = 1;
+				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
+				waitforclever = 1;
+				clever = setInterval(clevercheck, 100);
 			}
 		}
+	}
+	
+	if (greet == 0 && chatname == debuggroupname) {
+		printer += "Service is back *ONLINE*.";
+		greet = 1;
+		interacted = 1;
 	}
 	
 	if (interacted == 1 && waitforclever == 0) {
@@ -612,14 +543,7 @@ function clevercheck () {
 		if (document.querySelector("#app > iframe").contentWindow.cleverbot.aistate == 0) {
 			waitforclever = 0;
 			
-			var printer = "";
-			if (seamless == 0) {
-				//printer = defaultmsg + document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
-			} else {
-				printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
-			}
-			printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
-			
+			var printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
 			var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 
 			input.innerHTML = printer;
