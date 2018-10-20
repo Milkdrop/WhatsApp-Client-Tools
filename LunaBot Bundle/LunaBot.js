@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.1.1
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -41,6 +41,8 @@ var waitforclever = 0;
 var usedumb = 0;
 var responsechance = 3;
 
+var restart = 0;
+
 var lastmail = 0;
 
 var debuggroupname = "LunaBot Boot Camp";
@@ -64,7 +66,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v3.0* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v3.1* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		GeneralXMLHTTPRequest = new XMLHttpRequest();
 		
@@ -187,13 +189,13 @@ function resp (prevstr, str, chatname) {
 			if (str.substring(0, 4).toLowerCase() == "help") {
 				printer += "Hi there! You can talk to me by saying *" + prefix + " _message_*, or simply *!message*. If the message is a command from the list below, I will execute it.\n\n";
 				printer += "*Command List:*\n";
-				printer += "*" + prefix + " ping*: Check if the LunaBot service is online.\n";
-				printer += "*" + prefix + " weather _city_*: Check weather in any city you like.\n";
-				printer += "*" + prefix + " say _something_*: Make LunaBot say anything you want! Don't be too silly tho\n";
-				printer += "*" + prefix + " ask _question_*: Send WolframAlpha Query (can also solve equations)\n";
-				printer += "*" + prefix + " sendmail: Send an e-mail from any address, to any address, with any message. (I take 0 responsability for any damage done)\n";
-				printer += "*" + prefix + " quote*: Get a random quote\n";
-				printer += "*" + prefix + " joke*: Laugh a bit!\n";
+				printer += "*" + prefix + " ping:* Check if the LunaBot service is online.\n";
+				printer += "*" + prefix + " weather _city_:* Check weather in any city you like.\n";
+				printer += "*" + prefix + " say _something_:* Make LunaBot say anything you want! Don't be too silly tho\n";
+				printer += "*" + prefix + " ask _question_:* Send WolframAlpha Query (can also solve equations)\n";
+				printer += "*" + prefix + " sendmail:* Send an e-mail from any address, to any address, with any message. (I take 0 responsability for any damage done)\n";
+				printer += "*" + prefix + " quote:* Get a random quote\n";
+				printer += "*" + prefix + " joke:* Laugh a bit!\n";
 
 				printer += "\n\n\n_Let me know how I'm doing by replying with *good bot*/*headpat* if I did something nice, or with *bad bot*/*critique* if I did something silly._\n\n";
 				printer += "*In this update:*\n";
@@ -232,6 +234,7 @@ function resp (prevstr, str, chatname) {
 				
 				printer += "*Command List:*\n";
 				printer += "*" + prefix + " info*: Display config variables.\n";
+				printer += "*" + prefix + " restart*: Restart the LunaBot engine.\n";
 				printer += "*" + prefix + " dumb*: Talk with an user-trained version of Luna! Beware.\n";
 				//printer += "*" + prefix + " listen on/off*: Turn the Listening mode On/Off\n";
 				printer += "*" + prefix + " seamless on/off*: Seamless Conversation mode On/Off _[DEPRECATED]_\n";
@@ -278,7 +281,8 @@ function resp (prevstr, str, chatname) {
 				if (str == "") {
 					printer += "Tell me something to say, too!";
 				} else {
-					printer = Emoji_amyPC + Emoji_blueHeart + " " + str;
+					//printer = Emoji_amyPC + Emoji_blueHeart + " " + str;
+					printer = str;
 				}
 				
 			} else if (str.substring(0, 3).toLowerCase() == "ask") {
@@ -513,6 +517,13 @@ function resp (prevstr, str, chatname) {
 						printer += "Random response chance is now *" + responsechance + "%*";
 					}
 				}
+			} else if (str.substring(0, 7).toLowerCase() == "restart") {
+				if (chatname != debuggroupname) {
+					printer += "Sorry, debug features are only allowed on my debug group.";
+				} else {
+					printer += "Restarting...";
+					restart = 1;
+				}
 			} else {
 				//DIALOG FLOW
 				/*GeneralXMLHTTPRequest = new XMLHttpRequest();
@@ -582,12 +593,17 @@ function resp (prevstr, str, chatname) {
 	if (interacted == 1 && waitforclever == 0) {
 		if (printer == defaultmsg)
 			printer += str + " command not found!";
-
+	
 		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 		input.innerHTML = printer;
 		input.dispatchEvent(InputMsgEvent);
 		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
 		SendButts.click();
+		
+		if (restart == 1) {
+			restart = 0;
+			setTimeout(function(){ document.location.reload(); }, 3000);
+		}
 	}
 }
 
