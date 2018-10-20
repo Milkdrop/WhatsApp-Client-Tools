@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.3
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -38,6 +38,7 @@ var restart = 0;
 var lastmail = 0;
 var boottime = 0;
 
+var DefinitionCobai;
 var debuggroupname = "LunaBot Boot Camp";
 var prefix = "!Luna";
 var jokereplies = ["Ok here's a funny one:", "Ok here's a good one:", "I don't know about this one...", "For giggles:"];
@@ -46,6 +47,8 @@ var awake = ["Yes?", "I'm here", "Listening"];
 
 var smartreplies = ["The square root of 145924 is 382.", "Thanks! Now I'm so smart I can build my own bot to do all the hard work! <3", "I'm so smart I already know what you want to say. All the time.", "Imagine if you were as smart as I am now.", "I'm die SMARTEST", "Computing... Ah yes, the meaning of life! Found it.", ">Insert cheeky quote about being smart here<"];
 var dumbreplies = ["Hurr Durr", "I think. I guess. I don't know.", "hhurghgrughrgu...", "Ow my head", "head hurty...", "I... can't think stroight", "I WANT CANDyyyyy", ";-;", "Hi! >Random quote unrelated to the whole darn subject because I'm so dumb now<"];
+
+var hangman = {};
 
 var InputMsgEvent;
 var ClickEvent;
@@ -62,7 +65,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v3.2* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v3.3* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		GeneralXMLHTTPRequest = new XMLHttpRequest();
 		
@@ -77,7 +80,7 @@ function init() {
 			button: 0,
 			buttons: 1
 		});
-						
+		
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
         ifrm.setAttribute("src", "https://www.cleverbot.com/");
@@ -87,6 +90,7 @@ function init() {
 		clearInterval(initer);
 		
 		boottime = Date.now();
+		DefinitionCobai = document.createElement("div");
 	} else {
         console.log("LunaBot: [INFO] WAITING FOR MESSAGE FEED.");
 	}
@@ -192,10 +196,12 @@ function resp (prevstr, str, chatname) {
 			if (str.substring(0, 4).toLowerCase() == "help") {
 				printer += "Hi there! You can talk to me by saying *" + prefix + " _message_*, or simply *!message*. If the message is a command from the list below, I will execute it.\n\n";
 				printer += "*Command List:*\n";
-				printer += "*" + prefix + " ping:* Check if the LunaBot service is online.\n";
-				printer += "*" + prefix + " weather _city_:* Check weather in any city you like.\n";
+				printer += "*" + prefix + " ping:* Check if the LunaBot service is online\n";
+				printer += "*" + prefix + " weather _city_:* Check weather in any city you like\n";
 				printer += "*" + prefix + " say _something_:* Make LunaBot say anything you want! Don't be too silly tho\n";
 				printer += "*" + prefix + " ask _question_:* Send WolframAlpha Query (can also solve equations)\n";
+				printer += "*" + prefix + " hangman _EN / RO_:* Play a game of Hangman! Works for both ROmanian and ENglish\n";
+				printer += "*" + prefix + " dex _word_:* See the specific definitions of any Romanian word\n";
 				printer += "*" + prefix + " sendmail:* Send an e-mail from any address, to any address, with any message. (I take 0 responsability for any damage done)\n";
 				printer += "*" + prefix + " quote:* Get a random quote\n";
 				printer += "*" + prefix + " joke:* Laugh a bit!\n";
@@ -361,7 +367,7 @@ function resp (prevstr, str, chatname) {
 				GeneralXMLHTTPRequest.open("GET", "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke", false);
 				GeneralXMLHTTPRequest.send();
 				var responser = GeneralXMLHTTPRequest.responseText;
-				obj = JSON.parse(responser);
+				var obj = JSON.parse(responser);
 				printer += jokereplies[Math.floor(Math.random() * jokereplies.length)];
 				printer += "\n\n";
 				printer += "*" + obj["setup"] + "*";
@@ -423,14 +429,73 @@ function resp (prevstr, str, chatname) {
 					printer += "Usage:\n\n" + prefix + " sendmail\nFrom: *from@address*\nTo: *to@address*\n_message_";
 				}
 				
-			}  else if (str.substring(0, 3).toLowerCase() == "dex") {
+			} else if (str.substring(0, 3).toLowerCase() == "dex") {
 				str = str.substring(4);
-				GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/definitie/" + encodeURIComponent(str), false);
-				GeneralXMLHTTPRequest.send();
-				var el = document.createElement( 'html' );
-				el.innerHTML = GeneralXMLHTTPRequest.responseText;
-				var def = el.querySelector("#resultsTab > div:nth-child(7) > p > span");
 				
+				GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/definitie/" + encodeURIComponent(str) + "?format=json", false);
+				GeneralXMLHTTPRequest.send();
+				var obj = JSON.parse(GeneralXMLHTTPRequest.responseText);
+				var defs = obj["definitions"];
+				
+				if (defs.length == 0) {
+					printer += "Sorry, Requested word doesn't exist.";
+				} else {
+					printer += "*" + str.toUpperCase() + "*\n";
+					
+					var defcount = 5;
+					if (defs.length < 5)
+						defcount = defs.length;
+					
+					if (defcount == 1)
+						printer += "Posting the only *1* definition:\n\n";
+					else
+						printer += "Posting the first *" + defcount + "* definitions:\n\n";
+					
+					for (var i = 0; i < defcount; i++) {
+						printer += (i + 1) + ". ";
+						DefinitionCobai.innerHTML = defs[i]["htmlRep"]; //Strip HTML Tags
+						printer += DefinitionCobai.innerText + "\n";
+						printer += "*sursa:* " + defs[i].sourceName + ", *adaugata de:* " + defs[i].userNick + "\n\n";
+					}
+				}
+			} else if (str.substring(0, 7).toLowerCase() == "hangman") {
+				str = str.substring(8);
+				
+				if (str.toLowerCase() == "ro") {
+					if (hangman[chatname] == null) {
+						printer += "Alright, let's play! Word is in: *Romanian*\n\n"
+						GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/ajax/randomWord.php", false);
+						GeneralXMLHTTPRequest.send();
+						
+						var word = GeneralXMLHTTPRequest.responseText.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+						hangman[chatname] = {word: word, guesses: ""};
+						
+						for (var i = 0; i < word.length; i++)
+							printer += "_ ";
+					} else {
+						printer += "There's already an on-going Hangman Session. Type *" + prefix + " hangman reset* to reset it.";
+					}
+				} else if (str.toLowerCase() == "en") {
+					if (hangman[chatname] == null) {
+						printer += "Alright, let's play! Word is in: *English*\n\n"
+						GeneralXMLHTTPRequest.open("GET", "https://randomword.com/", false);
+						GeneralXMLHTTPRequest.send();
+						
+						var word = GeneralXMLHTTPRequest.responseText.split('"random_word"')[1];
+						word = word.substring(1, word.indexOf("<"));
+						word = word.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+						
+						hangman[chatname] = {word: word, guesses: ""};
+						
+						for (var i = 0; i < word.length; i++)
+							printer += "_ ";
+					}
+				} else if (str.toLowerCase() == "reset") {
+					hangman[chatname] = null;
+					printer += "The current Hangman Session has been reset! Type *" + prefix + " hangman EN / RO* to choose a new word.";
+				} else {
+					printer += "Please Choose either *EN* (English) or *RO* (Romanian): *" + prefix + " hangman EN / RO*";
+				}
 				
 			} else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
 				if (chatname != debuggroupname) {
@@ -506,11 +571,73 @@ function resp (prevstr, str, chatname) {
 				printer = obj["responses"][0];
 			}
 		} else if (interacted != 1) {
-			if (Math.floor(Math.random() * 100) < responsechance) { //Use cleverbot either way. It's safer.
-				interacted = 1;
-				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
-				waitforclever = 1;
-				clever = setInterval(clevercheck, 100);
+			if (hangman[chatname] != null) {
+				if (str.length == 1) {
+					interacted = 1;
+					str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+					
+					var word = hangman[chatname].word;
+					
+					if (hangman[chatname].guesses.toLowerCase().indexOf(str) != -1) {
+						printer += "The letter *" + str.toUpperCase() + "* has already been tried!\n\n";
+					} else if (str < "a" || str > "z") {
+						printer += "*" + str + "* is not a Letter!\n\n";
+					} else {
+						if (word.indexOf(str) == -1) {
+							printer += "Wrong Guess: *" + str.toUpperCase() + "*\n\n";
+							hangman[chatname].guesses += str;
+						} else {
+							printer += "Correct Guess: *" + str.toUpperCase() + "*!\n\n";
+							hangman[chatname].guesses += str.toUpperCase(); //Correct Guess: Uppercase
+							word = word.split(str).join(str.toUpperCase());
+						}
+						
+						hangman[chatname].word = word;
+					}
+					
+					if (word == word.toUpperCase()) {
+						printer += "Congratulations! Word is:\n";
+						printer += "*" + word + "*";
+						hangman[chatname].word = null;
+					} else {
+						var badguesses = 0;
+						
+						for (var i = 0; i < hangman[chatname].guesses.length; i++) {
+							if (hangman[chatname].guesses[i] == hangman[chatname].guesses[i].toLowerCase())
+								badguesses++;
+						}
+						
+						if (badguesses >= 10) {
+							printer += "You have just reached *10* Bad guesses. Game over!\n";
+							printer += "Correct Word was: *" + hangman[chatname].word.toUpperCase() + "*";
+							hangman[chatname] = null;
+						} else {
+							for (var i = 0; i < word.length; i++) {
+								if (word[i] == word[i].toUpperCase())
+									printer += word[i] + " ";
+								else
+									printer += "_ ";
+							}
+							
+							printer += "\n\n";
+							printer += "Letters Tried: ";
+						
+							for (var i = 0; i < hangman[chatname].guesses.length; i++) {
+								printer += hangman[chatname].guesses[i].toUpperCase() + " ";
+							}
+							
+							printer += "\n";
+							printer += "Bad Guesses: *" + badguesses + "*";
+						}
+					}
+				}
+			} else {
+				if (Math.floor(Math.random() * 100) < responsechance) { //Use cleverbot either way. It's safer.
+					interacted = 1;
+					document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
+					waitforclever = 1;
+					clever = setInterval(clevercheck, 100);
+				}
 			}
 		}
 	}
