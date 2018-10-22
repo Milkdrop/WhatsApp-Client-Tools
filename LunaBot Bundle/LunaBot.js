@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.3
+// @version      3.4.1
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -15,7 +15,7 @@
 var initialized = 0;
 var msgchecker = setInterval(checkmsg, 50);
 var initer = setInterval(init, 1000);
-var refr = setInterval(refresher, 21600000);
+var refr = setInterval(refresher, 10800000);
 
 var Emoji_amyPC;
 var Emoji_blueHeart;
@@ -65,7 +65,7 @@ function init() {
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v3.3* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v3.4* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		GeneralXMLHTTPRequest = new XMLHttpRequest();
 		
@@ -438,7 +438,7 @@ function resp (prevstr, str, chatname) {
 				var defs = obj["definitions"];
 				
 				if (defs.length == 0) {
-					printer += "Sorry, Requested word doesn't exist.";
+					printer += "Sorry, the requested word: *" + str + "* doesn't exist.";
 				} else {
 					printer += "*" + str.toUpperCase() + "*\n";
 					
@@ -462,36 +462,38 @@ function resp (prevstr, str, chatname) {
 				str = str.substring(8);
 				
 				if (str.toLowerCase() == "ro") {
-					if (hangman[chatname] == null) {
-						printer += "Alright, let's play! Word is in: *Romanian*\n\n"
-						GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/ajax/randomWord.php", false);
-						GeneralXMLHTTPRequest.send();
-						
-						var word = GeneralXMLHTTPRequest.responseText.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-						hangman[chatname] = {word: word, guesses: ""};
-						
-						for (var i = 0; i < word.length; i++)
-							printer += "_ ";
-					} else {
-						printer += "There's already an on-going Hangman Session. Type *" + prefix + " hangman reset* to reset it.";
+					if (hangman[chatname] != null) {
+						printer += "Nuking current Hangman session...\n";
 					}
+					
+					GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/ajax/randomWord.php", false);
+					GeneralXMLHTTPRequest.send();
+						
+					var word = GeneralXMLHTTPRequest.responseText.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+					hangman[chatname] = {word: word, guesses: ""};
+					
+					printer += "Alright, let's play! Word is in: *Romanian*. You got *" + 6 + "* tries.\n\n";
+					for (var i = 0; i < word.length; i++)
+						printer += "_ ";
+					
 				} else if (str.toLowerCase() == "en") {
-					if (hangman[chatname] == null) {
-						printer += "Alright, let's play! Word is in: *English*\n\n"
-						GeneralXMLHTTPRequest.open("GET", "https://randomword.com/", false);
-						GeneralXMLHTTPRequest.send();
-						
-						var word = GeneralXMLHTTPRequest.responseText.split('"random_word"')[1];
-						word = word.substring(1, word.indexOf("<"));
-						word = word.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-						
-						hangman[chatname] = {word: word, guesses: ""};
-						
-						for (var i = 0; i < word.length; i++)
-							printer += "_ ";
-					} else {
-						printer += "There's already an on-going Hangman Session. Type *" + prefix + " hangman reset* to reset it.";
+					if (hangman[chatname] != null) {
+						printer += "Nuking current Hangman session...\n";
 					}
+					
+					GeneralXMLHTTPRequest.open("GET", "https://randomword.com/", false);
+					GeneralXMLHTTPRequest.send();
+						
+					var word = GeneralXMLHTTPRequest.responseText.split('"random_word"')[1];
+					word = word.substring(1, word.indexOf("<"));
+					word = word.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+						
+					hangman[chatname] = {word: word, guesses: ""};
+					
+					printer += "Alright, let's play! Word is in: *English*. You got *" + 6 + "* tries.\n\n";
+					for (var i = 0; i < word.length; i++)
+						printer += "_ ";
+					
 				} else if (str.toLowerCase() == "reset") {
 					hangman[chatname] = null;
 					printer += "The current Hangman Session has been reset! Type *" + prefix + " hangman EN / RO* to choose a new word.";
@@ -609,8 +611,8 @@ function resp (prevstr, str, chatname) {
 								badguesses++;
 						}
 						
-						if (badguesses >= 10) {
-							printer += "You have just reached *10* Bad guesses. Game over!\n";
+						if (badguesses >= 6) {
+							printer += "You have just reached *" + 6 + "* Bad guesses. Game over!\n";
 							printer += "Correct Word was: *" + hangman[chatname].word.toUpperCase() + "*";
 							hangman[chatname] = null;
 						} else {
@@ -645,7 +647,11 @@ function resp (prevstr, str, chatname) {
 	}
 	
 	if (greet == 0 && chatname == debuggroupname) {
-		printer += "Service is back *ONLINE*.";
+		var date = Date().split(' ');
+		var printdate = '[' + date[2] + '/' + date[1] + '/' + date[3] + ' ' + date[4] + "] ";
+		
+		printer += printdate;
+		printer += "Service restarted.";
 		greet = 1;
 		interacted = 1;
 	}
