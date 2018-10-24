@@ -11,7 +11,7 @@ class SRV(object):
 			frm = getParam("frm")
 			to = getParam("to")
 			msg = getParam("msg")
-			subprocess.call("expect smtper " + frm + " " + to + " \"" + msg + "\"",shell=True)
+			subprocess.call(["expect", "smtper", frm, to, msg])
 			
 		elif (op == 1): #FETCH SETTINGS FILE
 			try:
