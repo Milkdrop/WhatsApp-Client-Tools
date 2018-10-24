@@ -12,7 +12,7 @@
     'use strict';
 
 //GLOBALS//
-var VersionNumber = "3.6rc5";
+var VersionNumber = "3.6";
 
 var initer = setInterval(init, 1000);
 var initialized = 0;
@@ -216,12 +216,11 @@ function engage (reqchatname, destinationchat) {
 		return;
 	}
 	
-	var newmsg = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:nth-last-child(1) > div > div > div.copyable-text > div > span");
+	var newmsg = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div:nth-last-child(1) > div > div > div.copyable-text > div > span");
 	var msgcount = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa").children.length;
 	
 	var number;
 	var name;
-	switchfreeze = 0;
 	
 	for (var i = 1; i <= msgcount; i++) {
 		var msgbody = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa > div:nth-last-child(" + i + ")");
@@ -234,7 +233,9 @@ function engage (reqchatname, destinationchat) {
 		}
 	}
 	
-	resp (newmsg.innerHTML, number, name, chatname);
+	if (newmsg != null)
+		resp (newmsg.innerHTML, number, name, chatname);
+	switchfreeze = 0;
 }
 
 function resp (str, senderNumber, senderName, chatname) {
@@ -472,6 +473,8 @@ function resp (str, senderNumber, senderName, chatname) {
 				
 				str = str.substring(str.indexOf("\n")+1);
 				msg = str;
+				DefinitionCobai.innerHTML = msg; //Strip HTML Tags
+				msg = DefinitionCobai.innerText;
 				
 				var sent = 0;
 				if (frm != "" && to != "" && msg != "") {
