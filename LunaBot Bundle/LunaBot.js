@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.4.1
+// @version      3.5
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -12,10 +12,13 @@
     'use strict';
 
 //GLOBALS//
-var initialized = 0;
-var msgchecker = setInterval(checkmsg, 50);
+var VersionNumber = "3.6rc5";
+
 var initer = setInterval(init, 1000);
-var refr = setInterval(refresher, 10800000);
+var initialized = 0;
+var refr = setInterval(refresher, 14400000);
+
+var RetryTime = 20;
 
 var Emoji_amyPC;
 var Emoji_blueHeart;
@@ -29,10 +32,8 @@ var defaultmsg;
 var badbot = 0;
 var goodbot = 0;
 var waitforclever = 0;
-var usedumb = 0;
-var responsechance = 3;
-
-var greet = 0;
+var usedumb = 1;
+var responsechance = 0;
 
 var restart = 0;
 var lastmail = 0;
@@ -46,26 +47,30 @@ var gotit = ["Noted!", "Got it.", "mhm", "yup", "continue", "go on", "heard you"
 var awake = ["Yes?", "I'm here", "Listening"];
 
 var smartreplies = ["The square root of 145924 is 382.", "Thanks! Now I'm so smart I can build my own bot to do all the hard work! <3", "I'm so smart I already know what you want to say. All the time.", "Imagine if you were as smart as I am now.", "I'm die SMARTEST", "Computing... Ah yes, the meaning of life! Found it.", ">Insert cheeky quote about being smart here<"];
-var dumbreplies = ["Hurr Durr", "I think. I guess. I don't know.", "hhurghgrughrgu...", "Ow my head", "head hurty...", "I... can't think stroight", "I WANT CANDyyyyy", ";-;", "Hi! >Random quote unrelated to the whole darn subject because I'm so dumb now<"];
+var dumbreplies = ["Hurr Durr", "I think. I guess. I don't know.", "hurghgrughrgu...", "Ow my head", "head hurty...", "I... can't think stroight", "I WANT CANDyyyyy", ";-;", "Hi! >Random quote unrelated to the whole darn subject because I'm so dumb now<"];
 
+var respchances = {};
 var hangman = {};
+var points = {};
 
 var InputMsgEvent;
 var ClickEvent;
 var GeneralXMLHTTPRequest;
 
+var logbreak = 0;
+var switchfreeze = 0;
+
 function init() {
 	if(document.getElementsByClassName("app-wrapper-web bFqKf")[0] != null && initialized == 0){
 		msgside = document.querySelector("#side > div._1vDUw > div > div > div");
 
-        initialized = 1;
 		Emoji_amyPC = String.fromCodePoint(0x1F469);
 		Emoji_amyPC += String.fromCodePoint(0x1F3FB);
 		Emoji_amyPC += String.fromCodePoint(0x200D);
 		Emoji_amyPC += String.fromCodePoint(0x1F4BB);
 		Emoji_blueHeart = String.fromCodePoint(0x1F499);
 		Emoji_redCross = String.fromCodePoint(0x274C);
-		defaultmsg = "LunaBot *v3.4* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
+		defaultmsg = "LunaBot *v" + VersionNumber + "* " + Emoji_amyPC + Emoji_blueHeart + "\n\n";
 		
 		GeneralXMLHTTPRequest = new XMLHttpRequest();
 		
@@ -87,12 +92,39 @@ function init() {
         ifrm.style.width = "0px";
         ifrm.style.height = "0px";
         document.querySelector("#app").appendChild(ifrm);
-		clearInterval(initer);
 		
 		boottime = Date.now();
 		DefinitionCobai = document.createElement("div");
-	} else {
-        console.log("LunaBot: [INFO] WAITING FOR MESSAGE FEED.");
+		
+		clearInterval(initer);
+        initialized = 1;
+		
+		printLog("Service Restarted.");
+		loadSettings();
+		setInterval(checkmsg, RetryTime);
+	}
+}
+
+function updateUser (uid, pts) {
+	uid = uid.split(' ').join('_');
+	GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=2&type=DATA&id=" + encodeURIComponent(uid) + "&pts=" + pts);
+	GeneralXMLHTTPRequest.send();
+}
+
+function loadSettings () {
+	GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=1", false);
+	GeneralXMLHTTPRequest.send();
+	var responser = GeneralXMLHTTPRequest.responseText.split('\n');
+	
+	var responselines = responser.length;
+	
+	for (var i = 0; i < responselines; i++) {
+		var line = responser[i];
+		line = line.split(' ');
+		if (line[0] == "DATA") {
+			var id = line[1].split('_').join(' ');
+			points[id] = parseInt(line[2]);
+		}
 	}
 }
 
@@ -102,77 +134,110 @@ function refresher() {
 	}
 }
 
+function printLog(msg) {
+	var children = msgside.children;
+	var debugfound = 0;
+	logbreak = 1;
+	
+	for (var i = 0; i < children.length; i++) {
+		if (children[i].querySelector("div > div > div._3j7s9 > div._2FBdJ > div._25Ooe > span").innerText == debuggroupname) {
+			var msgclick = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
+			msgclick.dispatchEvent(ClickEvent);
+			debugfound = 1;
+			
+			//Timestamp
+			var date = Date().split(' ');
+			var printdate = '[' + date[2] + '/' + date[1] + '/' + date[3] + ' ' + date[4] + "] ";
+			
+			sendmsg(printdate + msg);
+			break;
+		}
+	}
+	
+	if (debugfound == 0) {
+		logbreak = 0;
+	}
+}
+
+function sendmsg (msg) {
+	var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
+	if (input == null) {
+		setTimeout(function() {sendmsg(msg)}, RetryTime);
+		return;
+	}
+	
+	input.innerHTML = msg;
+	input.dispatchEvent(InputMsgEvent);
+	var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");
+	SendButts.click();
+	
+	if (logbreak == 1)
+		logbreak = 0;
+}
+
 function checkmsg() {
-    if (initialized == 1) {
+	if (logbreak == 0 && switchfreeze == 0) {
 		var children = msgside.children;
 		
-		if (greet == 0) {
-			for (var i = 0; i < children.length; i++) {
-				if (children[i].querySelector("div > div > div._3j7s9 > div._2FBdJ > div._25Ooe > span").innerHTML == debuggroupname) {
-					var msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
-					msg.dispatchEvent(ClickEvent);
-                    setTimeout(function() { engage(); }, 50);
-				}
-			}
-		}
-		
 		for (var i = 0; i < children.length; i++) {
-            var activity = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._3Bxar > span");
+			var activity = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._3Bxar > span");
 			if (activity.children.length == 1) {
 				var newmsgbubble = activity.querySelector ("div > span");
 				var newmsgcount = newmsgbubble.innerHTML;
+				var chatname = children[i].querySelector("div > div > div._3j7s9 > div._2FBdJ > div._25Ooe > span").innerText.substring(0,26).trim();
 				
 				if (newmsgcount != "READ" && waitforclever == 0) {
 					var msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
 					msg.dispatchEvent(ClickEvent);
-					
+						
 					newmsgbubble.innerHTML = "READ";
-                    setTimeout(function() { engage(); }, 50);
+					engage(chatname, msg);
+					break;
 				}
 			}
 		}
-    }
+	}
 }
 
-function engage () {
-    var chatname = document.querySelector("#main > header > div._1WBXd > div._2EbF- > div > span"); //GET CHATNAME
-	chatname = chatname.innerHTML;
-	chatname = chatname.substring(0,26); //TRIM CHATNAME
-	var textr = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:nth-last-child(1) > div > div > div.copyable-text > div > span");
-	var prevind = 2;
-	var previoustextr = document.querySelector ("#main > div._3zJZ2 > div > div > div._9tCEa > div.vW7d1:nth-last-child(" + prevind + ")");
-	if (previoustextr == null) { //IF *1 NEW MESSAGE* APPEARS IN THE LIST
-		prevind = 3;
-		var previoustextr = document.querySelector ("#main > div._3zJZ2 > div > div > div._9tCEa > div.vW7d1:nth-last-child(" + prevind + ")");
+function engage (reqchatname, destinationchat) {
+	switchfreeze = 1;
+    var chatname = document.querySelector("#main > header > div._1WBXd > div._2EbF- > div > span");
+	
+	if (chatname == null) { //retry
+		setTimeout(function() {engage(reqchatname)}, RetryTime);
+		return;
 	}
 	
-	//while (previoustextr.querySelector ("div.message-out") != null) { //ITERATE UNTIL WE FIND A MESSAGE THAT'S NOT THE BOT'S
-	while (previoustextr.innerHTML.indexOf(defaultmsg.substring(0,13)) != -1 && previoustextr.innerHTML.indexOf(prefix) != -1) {
-		prevind = prevind + 1;
-		previoustextr = document.querySelector ("#main > div._3zJZ2 > div > div > div._9tCEa > div:nth-last-child(" + prevind + ")");
-		if (previoustextr == null)
+	chatname = chatname.innerText.substring(0,26).trim(); //GET CHATNAME
+	
+	if (reqchatname != chatname) {
+		destinationchat.dispatchEvent(ClickEvent);
+		setTimeout(function() {engage(reqchatname)}, RetryTime);
+		return;
+	}
+	
+	var newmsg = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:nth-last-child(1) > div > div > div.copyable-text > div > span");
+	var msgcount = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa").children.length;
+	
+	var number;
+	var name;
+	switchfreeze = 0;
+	
+	for (var i = 1; i <= msgcount; i++) {
+		var msgbody = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa > div:nth-last-child(" + i + ")");
+		var msgnumber = msgbody.querySelector("div > div > div._2lc14 > span.RZ7GO");
+		
+		if (msgnumber != null) {
+			number = msgnumber.innerHTML;
+			name = msgbody.querySelector("span._1wjpf").innerHTML;
 			break;
+		}
 	}
 	
-	if (previoustextr != null) {
-		previoustextr = previoustextr.querySelector ("div > div > div.copyable-text > div > span");
-		if (previoustextr == null) { //unexpected result ?
-			resp("", textr.innerHTML, chatname);
-		} else {
-			if (previoustextr.innerHTML.indexOf("Acest mesaj a fost") == -1) { //ROMANIAN
-				resp(previoustextr.innerHTML, textr.innerHTML, chatname);
-			} else {
-				resp("", textr.innerHTML, chatname); //Previous text was deleted
-			}
-		}
-	} else {
-		resp("", textr.innerHTML, chatname); //Previous text is literally nothing
-	}
+	resp (newmsg.innerHTML, number, name, chatname);
 }
 
-function resp (prevstr, str, chatname) {
-	//console.log ("LunaBot: [INFO] Received Message: " + str + " From Chat: " + chatname + " With Previous Message: " + prevstr);
-	
+function resp (str, senderNumber, senderName, chatname) {
 	var printer = defaultmsg;
 	var interacted = 0;
 	
@@ -187,12 +252,12 @@ function resp (prevstr, str, chatname) {
 		interacted = 1;
 	}
 	
-	if (str.indexOf(defaultmsg.substring(0,13)) == -1 && waitforclever == 0) { //IF MESSAGE IS FROM THE BOT ITSELF
+	if (str.indexOf(defaultmsg.substring(0,13)) == -1 && waitforclever == 0) { //IF MESSAGE IS NOT FROM THE BOT ITSELF
 		if (str.substring(0, prefix.length).toLowerCase() == prefix.toLowerCase()) {
 			interacted = 1;
-			str = str.substring (prefix.length + 1, 512);
-			
+			str = str.substring (prefix.length + 1, 512); //TRIM INPUT
 			str = str.trim();
+			
 			if (str.substring(0, 4).toLowerCase() == "help") {
 				printer += "Hi there! You can talk to me by saying *" + prefix + " _message_*, or simply *!message*. If the message is a command from the list below, I will execute it.\n\n";
 				printer += "*Command List:*\n";
@@ -205,28 +270,44 @@ function resp (prevstr, str, chatname) {
 				printer += "*" + prefix + " sendmail:* Send an e-mail from any address, to any address, with any message. (I take 0 responsability for any damage done)\n";
 				printer += "*" + prefix + " quote:* Get a random quote\n";
 				printer += "*" + prefix + " joke:* Laugh a bit!\n";
+				printer += "*" + prefix + " whoami:* Show sender info.\n";
+				printer += "*" + prefix + " responsechance _integer_*: Change the random response chance for this group.\n";
 
 				printer += "\n\n\n_Let me know how I'm doing by replying with *good bot*/*headpat* if I did something nice, or with *bad bot*/*critique* if I did something silly._\n\n";
 				printer += "*In this update:*\n";
 				printer += "I received " + "*" + goodbot + "*" + " headpats " + Emoji_blueHeart + "\n";
 				printer += "And " + "*" + badbot + "*" + " critiques! " + Emoji_redCross + "\n\n";
+				
 				if (goodbot >= badbot) {
 					printer += "Yay!";
 				} else {
 					printer += "Awf...";
 				}
+				
 			} else if (str.substring(0,4).toLowerCase() == "info") {
 				printer += "Prefix: *" + prefix + "*\n";
 				printer += "Chat mode: ";
+				
 				if (usedumb == 1) {
 					printer += "*DUMB*\n";
 				} else {
 					printer += "*SMART*\n";
 				}
 				
-				printer += "Random Response Chance: *" + responsechance + "%*";
+				if (chatname == debuggroupname) {
+					printer += "Global response chance: *" + responsechance + "%*\n";
+					for (i in respchances)
+						printer += "Group _" + i + "_ has a response chance of *" + respchances[i] + "%*\n";
+					
+				} else {
+					if (respchances[chatname] == null) {
+						printer += "Random Response Chance: *" + responsechance + "%*\n";
+					} else {
+						printer += "Random Response Chance: *" + respchances[chatname] + "%*\n";
+					}
+				}
 				
-				printer += "\n\n";
+				printer += "\n";
 				printer += "Uptime: *"
 				
 				var totalseconds = Math.floor((Date.now() - boottime)/1000);
@@ -251,9 +332,9 @@ function resp (prevstr, str, chatname) {
 				
 				if (days != 0 || hours != 0 || (hours == 0 && minutes != 0)) {
 					if (minutes == 1)
-						printer += minutes + " Minute, ";
+						printer += minutes + " Minute and ";
 					else
-						printer += minutes + " Minutes, ";
+						printer += minutes + " Minutes and ";
 				}
 				
 				if (seconds == 1)
@@ -268,7 +349,6 @@ function resp (prevstr, str, chatname) {
 				printer += "*" + prefix + " info*: Display config variables.\n";
 				printer += "*" + prefix + " restart*: Restart the LunaBot engine.\n";
 				printer += "*" + prefix + " switchdumb*: Switch between Dumb and Smart chat mode.\n";
-				printer += "*" + prefix + " responsechance _integer_*: Change the random response chance. _[WORKS ANYWHERE]_\n";
 				printer += "*" + prefix + " changeprefix _newPrefix_*: Change The Prefix\n";
 				
 			} else if (str.length == 0) { //JUST PREFIX
@@ -405,8 +485,6 @@ function resp (prevstr, str, chatname) {
 						to = to.substring(0, to.indexOf("<"));
 					}
 					
-					console.log(frm);
-					console.log(to);
 					if (frm.indexOf("@") != -1 && to.indexOf("@") != -1) {
 						if (Date.now() - lastmail <= 150000) {
 							if ((60 - Math.floor(((Date.now() - lastmail)/1000)%60)) >= 10) {
@@ -416,7 +494,7 @@ function resp (prevstr, str, chatname) {
 							}
 							sent = 1;
 						} else {
-							GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?frm=" + encodeURIComponent(frm) + "&to=" + encodeURIComponent(to) + "&msg=" + encodeURIComponent(msg), false);
+							GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=0&frm=" + encodeURIComponent(frm) + "&to=" + encodeURIComponent(to) + "&msg=" + encodeURIComponent(msg), false);
 							GeneralXMLHTTPRequest.send();
 							sent = 1;
 							lastmail = Date.now();
@@ -501,6 +579,28 @@ function resp (prevstr, str, chatname) {
 					printer += "Please Choose either *EN* (English) or *RO* (Romanian):\n*" + prefix + " hangman EN / RO*";
 				}
 				
+			} else if (str.substring(0, 6).toLowerCase() == "whoami") {
+				if (senderName == null) {
+					printer += "I can't get your info, sorry.";
+				} else {
+					printer += "Your name is: *" + senderName + "*\n";
+					printer += "Your phone number is: *" + senderNumber + "*\n";
+					if (points[senderNumber] == null)
+						points[senderNumber] = 0;
+					printer += "Shushhh... Secret feature: You have *" + points[senderNumber] + "* points.\n";
+				}
+			} else if (str.substring(0, 3).toLowerCase() == "inc") {
+				if (senderName == null) {
+					printer += "I can't get your info, sorry.";
+				} else {
+					if (points[senderNumber] == null)
+						points[senderNumber] = 0;
+					points[senderNumber] += 1;
+					
+					printer += "Shushhh... Secret feature. Your point count has been increased by one.\n";
+					printer += "Now you have: *" + points[senderNumber] + "* points.";
+					updateUser(senderNumber, points[senderNumber]);
+				}
 			} else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
 				if (chatname != debuggroupname) {
 					printer += "Sorry, debug features are only allowed on my debug group.";
@@ -514,20 +614,23 @@ function resp (prevstr, str, chatname) {
 					}
 				}
 			} else if (str.substring(0, 14).toLowerCase() == "responsechance") {
-				if (chatname != debuggroupname && false) {
-					printer += "Sorry, debug features are only allowed on my debug group.";
+				str = str.substring(15);
+				if (str == "" || isNaN(parseInt(str))) {
+					printer += "Usage: " + prefix + " responsechance _integer_";
 				} else {
-					str = str.substring(15);
-					if (str == "" || isNaN(parseInt(str))) {
-						printer += "Usage: " + prefix + " responsechance _integer_";
-					} else {
-						responsechance = parseInt(str);
-						if (responsechance > 100)
-							responsechance = 100;
-						if (responsechance < 0)
-							responsechance = 0;
-						printer += "Random response chance is now *" + responsechance + "%*";
-					}
+					var newchance = parseInt(str);
+					
+					if (newchance > 100)
+						newchance = 100;
+					if (newchance < 0)
+						newchance = 0;
+					
+					if (chatname == debuggroupname)
+						responsechance = newchance;
+					else
+						respchances[chatname] = newchance;
+					
+					printer += "Random response chance is now *" + newchance + "%*";
 				}
 			} else if (str.substring(0, 7).toLowerCase() == "restart") {
 				if (chatname != debuggroupname) {
@@ -636,7 +739,11 @@ function resp (prevstr, str, chatname) {
 					}
 				}
 			} else {
-				if (Math.floor(Math.random() * 100) < responsechance) { //Use cleverbot either way. It's safer.
+				var resp = responsechance;
+				if (respchances[chatname] != null)
+					resp = respchances[chatname];
+				
+				if (Math.floor(Math.random() * 100) < resp) { //Use cleverbot either way. It's safer.
 					interacted = 1;
 					document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
 					waitforclever = 1;
@@ -646,25 +753,11 @@ function resp (prevstr, str, chatname) {
 		}
 	}
 	
-	if (greet == 0 && chatname == debuggroupname) {
-		var date = Date().split(' ');
-		var printdate = '[' + date[2] + '/' + date[1] + '/' + date[3] + ' ' + date[4] + "] ";
-		
-		printer += printdate;
-		printer += "Service restarted.";
-		greet = 1;
-		interacted = 1;
-	}
-	
 	if (interacted == 1 && waitforclever == 0) {
 		if (printer == defaultmsg)
-			printer += str + " command not found!";
+			printer += "Your input: *" + str + "* did not return anything from the LunaBot engine.";
 	
-		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-		input.innerHTML = printer;
-		input.dispatchEvent(InputMsgEvent);
-		var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
-		SendButts.click();
+		sendmsg(printer);
 		
 		if (restart == 1) {
 			restart = 0;
@@ -677,14 +770,8 @@ function clevercheck () {
 	if (waitforclever == 1) {
 		if (document.querySelector("#app > iframe").contentWindow.cleverbot.aistate == 0) {
 			waitforclever = 0;
-			
 			var printer = document.querySelector("#app > iframe").contentWindow.cleverbot.reply;
-			var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-
-			input.innerHTML = printer;
-			input.dispatchEvent(InputMsgEvent);
-			var SendButts = document.querySelector("#main > footer > div._3pkkz > div:nth-child(3) > button");  // Select the button Kek
-			SendButts.click();
+			sendmsg(printer);
 			
 			clearInterval(clever);
 		}

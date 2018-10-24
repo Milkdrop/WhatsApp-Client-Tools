@@ -1,0 +1,76 @@
+import cherrypy
+import subprocess
+
+def getParam (name):
+	return cherrypy.request.params.get(name)
+	
+class SRV(object):
+	def index(self, **params):
+		op = int(getParam("op"))
+		if (op == 0):
+			frm = getParam("frm")
+			to = getParam("to")
+			msg = getParam("msg")
+			subprocess.call("expect smtper " + frm + " " + to + " \"" + msg + "\"",shell=True)
+			
+		elif (op == 1): #FETCH SETTINGS FILE
+			try:
+				open("Settings.txt", "r")
+			except: #Make file
+				settingsout = open("Settings.txt", "w")
+				settingsout.write("\n")
+				settingsout.close()
+			
+			settings = open("Settings.txt", "r").read()
+			
+			if (settings == ""):
+				return "Empty Settings.";
+			else:
+				return settings
+				
+		elif (op == 2): #WRITE SETTING
+			try:
+				open("Settings.txt", "r")
+			except: #Make file
+				settingsout = open("Settings.txt", "w")
+				settingsout.write("\n")
+				settingsout.close()
+			
+			settinglines = open("Settings.txt", "r").readlines()
+			
+			newsettings = ""
+			savetype = getParam("type")
+			id = getParam("id")
+			pts = getParam("pts")
+				
+			found = 0
+			for line in settinglines:
+				if (line != '\n'):
+					dat = line.split(' ')
+					if (dat[0] == savetype and dat[1] == id):
+						newsettings += str(savetype) + " " + str(id) + " " + str(pts) + '\n'
+						found = 1
+					else:
+						newsettings += line
+				
+			if (found == 0):
+				newsettings += str(savetype) + " " + str(id) + " " + str(pts)
+					
+			settingsout = open("Settings.txt", "w")
+			settingsout.write (newsettings)
+			
+			return "Settings updated."
+	index.exposed = True
+	
+conf = {
+        '/': {
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [('Content-Type', 'text/html'), ('Access-Control-Allow-Origin', '*')],
+            'server.socket_host': '0.0.0.0',
+            'server.socket_port': 2000
+        }
+}
+
+print ("LunaBot Python Back-End.")
+cherrypy.config.update( {'server.socket_host': '0.0.0.0', 'server.socket_port': 2000} )
+cherrypy.quickstart(SRV(), '/', conf)
