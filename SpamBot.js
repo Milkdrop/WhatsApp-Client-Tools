@@ -1,116 +1,84 @@
-var timer = setInterval(general,1000);
-var botnet = setInterval(setbotnet,250);
-var BGimg = document.createElement('img');
-var PROFimg;
-var Init = 0;
-var SpamTimer = 0;
-var ChillABit = 0;
-var Sending = 0;
-//simulate(document.querySelector("#side > header > div._20NlL > div > span > div.rAUz7:last-child > div"), "click");
-//simulatedClick(document.getElementById("btn"));
-//document.querySelector("#side > header > div._20NlL > div > span > div.rAUz7:last-child > span > div > ul > li:nth-child(1) > div").innerHTML = "freesex"
+// ==UserScript==
+// @name         SpamBot
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  A Simple WhatsApp Spambot
+// @author       You
+// @match        https://web.whatsapp.com/*
+// @grant        none
+// ==/UserScript==
 
-function setbotnet() {
-	if (Init == 1) {
-	var imag = document.querySelector("#app > div > div > div.MZIyP > div._3q4NP.k1feT > span > div > div > div > div._12fSF > div > div > div > div > div > img");
-	var chatBG = document.querySelector("#main > div._3zJZ2");
-	if (chatBG != null) {
-		if (chatBG.childElementCount < 4) {
-			chatBG.appendChild(BGimg);
-        }
+(function() {
+    'use strict';
+
+var initTimer = setInterval(init, 1000);
+var running = false;
+
+var SendMSG;
+var InputEvt;
+
+function init(){
+	if(document.getElementsByClassName("app-wrapper-web bFqKf")[0] != null){
+		var style = document.createElement('style');
+		style.innerHTML = '.MODDED { background-color: #00000000; width: 100%; height: 100%}';
+		document.head.appendChild(style);
+		document.querySelector("#app > div").className = "MODDED app-wrapper-web bFqKf";
+		document.body.style.backgroundImage = 'url(https://github.com/MoonfireSeco/puteri2/raw/master/bg_sakura.png)'; //Set a nice Background
+
+		var SpamGUI = document.createElement("header");
+		SpamGUI.className = "_3auIg";
+		SpamGUI.innerHTML = `With love from Amy 💙`;
+		SpamGUI.innerHTML += `<input type='text' id='SpamMessage' placeholder='Message to Spam' size='19' class='selectable-text invisible-space copyable-text'>`;
+		SpamGUI.innerHTML += `<div id='StopSpam' title='Stop' style='margin-left: 10px; cursor:pointer;'> <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='30' height='30'> <path opacity='.45' fill='#263238' d='M19.1 17.2l-5.3-5.3 5.3-5.3-1.8-1.8-5.3 5.4-5.3-5.3-1.8 1.7 5.3 5.3-5.3 5.3L6.7 19l5.3-5.3 5.3 5.3 1.8-1.8z'></path></svg></div>`;
+		SpamGUI.innerHTML += `<div id='StartSpam' title='Start' style='margin-left: 10px;cursor:pointer;'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path opacity=".4" d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"></path></svg></div>`;
+		
+		document.querySelector("#side").insertBefore(SpamGUI, document.querySelector("#side > header").nextSibling);
+		
+		document.getElementById("StartSpam").addEventListener("click", StartSpam);
+		document.getElementById("StopSpam").addEventListener("click", StopSpam);
+		
+		InputEvt = new InputEvent('input', {
+			bubbles: true,
+			composer: true
+		});
+		
+		clearInterval(initTimer);
 	}
-
-	if (imag != null) {
-	    if (imag.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif") {
-		    imag.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
-        }
-    }
-	if (PROFimg.src != "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif") {
-		PROFimg.src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
-    }
-    }
 }
 
-	function sleep(ms) {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	}
+function StopSpam () {
+	running = false;
+	clearInterval(SendMSG);
+}
 
-    function general(){
-        if(document.getElementsByClassName("app-wrapper-web bFqKf")[0] != null){
-			var style = document.createElement('style');
-			style.type = 'text/css';
-			style.innerHTML = '.MODDED { background-color: #00000000; width: 100%; height: 100%; overflow: hidden; }';
-			document.querySelector("#side > header > div._2umId > div._1WliW > img").src = "https://raw.githubusercontent.com/MoonfireSeco/hello-world/master/ezgif.com-crop%20(1).gif";
-			document.getElementsByTagName('head')[0].appendChild(style);
-
-			document.getElementsByTagName('body')[0].style.backgroundImage='url(https://github.com/MoonfireSeco/puteri2/raw/master/bg_sakura.png)' //Set BG :^)
-			document.getElementById('app').firstChild.className = 'MODDED app-wrapper-web bFqKf ';
-
-			BGimg.src = "";
-			PROFimg = document.querySelector("#side > header > div._2umId > div._1WliW > img");
-			Init = 1;
-
-            var item2 = document.getElementsByClassName("_3auIg")[0];
-            var panel = document.getElementsByClassName("swl8g")[0];
-            var SpamBot = item2.cloneNode(true);
-            //var MakeGroup = SpamBot.cloneNode(true);
-            SpamBot.style.zIndex = 0;                // This way the menu doesn't go below our app
-            SpamBot.innerHTML = "With Love from Cad3nce (^˵◕ω◕˵^) <input type='text' id='mensaje' placeholder='Message to Spam' size='19' class='selectable-text invisible-space copyable-text'> <div id='CancelButt' title='PAUSE BOT' data-icon='x' class='' style='margin-left: 10px;cursor:pointer;'><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='30' height='30'> <path opacity='.45' fill='#263238' d='M19.1 17.2l-5.3-5.3 5.3-5.3-1.8-1.8-5.3 5.4-5.3-5.3-1.8 1.7 5.3 5.3-5.3 5.3L6.7 19l5.3-5.3 5.3 5.3 1.8-1.8z'></path></svg></div> <div id='spam' title='START BOT' data-icon=\"send\" class=\"img icon icon-send\" style='margin-left: 10px;cursor:pointer;'><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\"><path opacity=\".4\" d=\"M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z\"></path></svg></div>";
-			//MakeGroup.innerHTML += "<br> <br> <br> <div id = 'MakeGR' data-icon='chat' class=''><svg id='Layer_1' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'><path opacity='.55' fill='#263238' d='M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821c-.001-1.032-1.032-1.646-2.064-1.646zm-4.989 9.869H7.041V11.1h6.975v1.944zm3-4H7.041V7.1h9.975v1.944z'></path></svg></div>";
-            panel.insertBefore(SpamBot, panel.childNodes[1]);					  // Insert everything we have created
-			//panel.insertBefore(MakeGroup, panel.childNodes[2]);					  // Insert everything we have created
-            document.getElementById("spam").addEventListener("click", spam);     // Assign a function to the botton
-			document.getElementById("CancelButt").addEventListener("click", CancelBoi);
-            clearInterval(timer);
-        }else{
-            console.log("WS Spam: Waiting for whatsapp to load...");
-        }
-    }
-
-	function CancelBoi () {
-		Sending = 0;
-		clearInterval(dispatch);
-	}
-
-	function SendMessage () {
-		if (Sending == 1) {
-			InputEvent = Event || InputEvent;
-			var message = document.getElementById("mensaje").value;       // Get text to spam
-			if (message == "") {
-				message = "‫";
-            }
-            var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
-			var evt = new InputEvent('input', {						// Create a new event from type "input"
-				bubbles: true,
-			composer: true
-			});
-			input.innerHTML = message;								// Get text to spam
-			input.dispatchEvent(evt);								// Fire the event (inserts text) in the input field.
-			var SendButts = document.querySelector("#main > footer > div._3pkkz > div.weEq5 > button._35EW6");  // Select the button Kek
-			SendButts.click();
+function SendMessage () {
+	var LastMessageTime = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div._3_7SH._3DFk6.message-out > div > div._2f-RV > div > span");
+	
+	if (LastMessageTime != null) {
+		LastMessageTime.innerHTML = "Spam";
+		var MessageStatus = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div > div > div._2f-RV > div > div > span");
+		
+		if (MessageStatus.getAttribute("data-icon") != "msg-time") { //Ready to send
+			var message = document.getElementById("SpamMessage").value; // Get text to spam
+			if (message == "")
+				message = "‫"; //Hidden Char
+			
+			var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input box
+			input.innerHTML = message; 
+			input.dispatchEvent(InputEvt);
+			
+			var SendButton = document.querySelector("#main > footer > div._3pkkz > div.weEq5 > button._35EW6");
+			SendButton.click();
 		}
 	}
+}
 
-    async function dispatch() {
-		ChillABit = 0;
-		var LastMessageTime = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div._3_7SH._3DFk6.message-out > div > div._2f-RV > div > span");
-		if (LastMessageTime != null) {
-			if (Sending == 1) {
-				LastMessageTime.innerHTML = "SCANN3D";
-            }
-			var MessageSent = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div > div > div._2f-RV > div > div > span");
-			if (MessageSent.getAttribute("data-icon") == "msg-time") {
-				ChillABit = 1;
-			}
-		}
-
-		if (!ChillABit) {
-			SendMessage();
-		}
-    }
-
-    function spam(){
-		Sending = 1;
+function StartSpam(){
+	if (running == false) {
+		running = true;
 		SendMessage();
-		SpamTimer = setInterval(dispatch,10)
-    }
+		SendMSG = setInterval(SendMessage, 10);
+	}
+}
+
+})();
