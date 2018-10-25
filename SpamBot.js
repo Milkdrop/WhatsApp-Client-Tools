@@ -54,22 +54,28 @@ function StopSpam () {
 function SendMessage () {
 	var LastMessageTime = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div._3_7SH._3DFk6.message-out > div > div._2f-RV > div > span");
 	
-	if (LastMessageTime != null) {
+	var OK = false;
+	if (LastMessageTime != null) { //If message is ours
 		LastMessageTime.innerHTML = "Spam";
 		var MessageStatus = document.querySelector("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div.vW7d1:last-child > div > div > div._2f-RV > div > div > span");
-		
-		if (MessageStatus.getAttribute("data-icon") != "msg-time") { //Ready to send
-			var message = document.getElementById("SpamMessage").value; // Get text to spam
-			if (message == "")
-				message = "‫"; //Hidden Char
-			
-			var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input box
-			input.innerHTML = message; 
-			input.dispatchEvent(InputEvt);
-			
-			var SendButton = document.querySelector("#main > footer > div._3pkkz > div.weEq5 > button._35EW6");
-			SendButton.click();
+		if (MessageStatus.getAttribute("data-icon") != "msg-time") {
+			OK = true;
 		}
+	} else { //If message is not ours
+		OK = true;
+	}
+	
+	if (OK) {
+		var message = document.getElementById("SpamMessage").value; // Get text to spam
+		if (message == "")
+			message = "‫"; //Hidden Char
+			
+		var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input box
+		input.innerHTML = message; 
+		input.dispatchEvent(InputEvt);
+			
+		var SendButton = document.querySelector("#main > footer > div._3pkkz > div.weEq5 > button._35EW6");
+		SendButton.click();
 	}
 }
 
