@@ -159,10 +159,14 @@ function printLog(msg) {
 	}
 }
 
+function retrysendmsg (msg) {
+	sendmsg(msg);
+}
+
 function sendmsg (msg) {
 	var input = document.querySelector("#main > footer > div._3pkkz > div._1Plpp > div > div._2S1VP.copyable-text.selectable-text");  // Select the input
 	if (input == null) {
-		setTimeout(function() {sendmsg(msg)}, RetryTime);
+		setTimeout(retrysendmsg, RetryTime, msg);
 		return;
 	}
 	
@@ -199,12 +203,16 @@ function checkmsg() {
 	}
 }
 
+function retryengage (reqchat, destchat) {
+	engage(reqchat, destchat);
+}
+
 function engage (reqchatname, destinationchat) {
 	switchfreeze = 1;
     var chatname = document.querySelector("#main > header > div._1WBXd > div._2EbF- > div > span");
 	
 	if (chatname == null) { //retry
-		setTimeout(function() {engage(reqchatname)}, RetryTime);
+		setTimeout(retryengage, RetryTime, reqchatname, destinationchat);
 		return;
 	}
 	
@@ -212,7 +220,7 @@ function engage (reqchatname, destinationchat) {
 	
 	if (reqchatname != chatname) {
 		destinationchat.dispatchEvent(ClickEvent);
-		setTimeout(function() {engage(reqchatname)}, RetryTime);
+		setTimeout(retryengage, RetryTime, reqchatname, destinationchat);
 		return;
 	}
 	
