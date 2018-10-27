@@ -3,9 +3,10 @@ import subprocess
 
 def getParam (name):
 	return cherrypy.request.params.get(name)
-	
+
 class SRV(object):
 	def index(self, **params):
+		global subchrome
 		op = int(getParam("op"))
 		if (op == 0):
 			frm = getParam("frm")
@@ -60,6 +61,9 @@ class SRV(object):
 			settingsout.write (newsettings)
 			
 			return "Settings updated."
+		elif (op == 3):
+			subchrome.kill()
+			subchrome = subprocess.Popen("exec chromium-browser --user-data-dir='LunaBot' --disable-web-security web.whatsapp.com", shell=True)
 	index.exposed = True
 	
 conf = {
@@ -72,5 +76,7 @@ conf = {
 }
 
 print ("LunaBot Python Back-End.")
+subchrome = subprocess.Popen("exec chromium-browser --user-data-dir='LunaBot' --disable-web-security web.whatsapp.com", shell=True)
+
 cherrypy.config.update( {'server.socket_host': '0.0.0.0', 'server.socket_port': 2000} )
 cherrypy.quickstart(SRV(), '/', conf)
