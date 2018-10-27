@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.5
+// @version      3.7
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -12,13 +12,13 @@
     'use strict';
 
 //GLOBALS//
-var VersionNumber = "3.6";
+var VersionNumber = "3.7rc3";
 
 var initer = setInterval(init, 1000);
 var initialized = 0;
 var refr = setInterval(refresher, 14400000);
 
-var RetryTime = 20;
+var RetryTime = 50;
 
 var Emoji_amyPC;
 var Emoji_blueHeart;
@@ -59,6 +59,7 @@ var GeneralXMLHTTPRequest;
 
 var logbreak = 0;
 var switchfreeze = 0;
+var cnt = 0;
 
 function init() {
 	if(document.getElementsByClassName("app-wrapper-web bFqKf")[0] != null && initialized == 0){
@@ -99,7 +100,7 @@ function init() {
 		clearInterval(initer);
         initialized = 1;
 		
-		printLog("Service Restarted.");
+		printLog ("Service Restarted!");
 		loadSettings();
 		setInterval(checkmsg, RetryTime);
 	}
@@ -114,23 +115,26 @@ function updateUser (uid, pts) {
 function loadSettings () {
 	GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=1", false);
 	GeneralXMLHTTPRequest.send();
-	var responser = GeneralXMLHTTPRequest.responseText.split('\n');
-	
-	var responselines = responser.length;
-	
-	for (var i = 0; i < responselines; i++) {
-		var line = responser[i];
-		line = line.split(' ');
-		if (line[0] == "DATA") {
-			var id = line[1].split('_').join(' ');
-			points[id] = parseInt(line[2]);
+	if (GeneralXMLHTTPRequest.status == 200) {
+		var responser = GeneralXMLHTTPRequest.responseText.split('\n');
+		
+		var responselines = responser.length;
+		
+		for (var i = 0; i < responselines; i++) {
+			var line = responser[i];
+			line = line.split(' ');
+			if (line[0] == "DATA") {
+				var id = line[1].split('_').join(' ');
+				points[id] = parseInt(line[2]);
+			}
 		}
 	}
 }
 
 function refresher() {
 	if (initialized == 1) {
-		document.location.reload();
+		GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=3", false);
+		GeneralXMLHTTPRequest.send();
 	}
 }
 
@@ -141,7 +145,7 @@ function printLog(msg) {
 	
 	for (var i = 0; i < children.length; i++) {
 		if (children[i].querySelector("div > div > div._3j7s9 > div._2FBdJ > div._25Ooe > span").innerText == debuggroupname) {
-			var msgclick = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
+			var msgclick = children[i].querySelector ("div > div > div._3j7s9");
 			msgclick.dispatchEvent(ClickEvent);
 			debugfound = 1;
 			
@@ -191,9 +195,9 @@ function checkmsg() {
 				var chatname = children[i].querySelector("div > div > div._3j7s9 > div._2FBdJ > div._25Ooe > span").innerText.substring(0,26).trim();
 				
 				if (newmsgcount != "READ" && waitforclever == 0) {
-					var msg = children[i].querySelector ("div > div > div._3j7s9 > div._1AwDx > div._itDl > span");
+					var msg = children[i].querySelector ("div > div > div._3j7s9");
 					msg.dispatchEvent(ClickEvent);
-						
+					
 					newmsgbubble.innerHTML = "READ";
 					engage(chatname, msg);
 					break;
@@ -246,7 +250,16 @@ function engage (reqchatname, destinationchat) {
 	switchfreeze = 0;
 }
 
-function resp (str, senderNumber, senderName, chatname) {
+function sleep(temp) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve('resolved');
+    }, temp);
+  });
+}
+
+async function resp (str, senderNumber, senderName, chatname) {
+	cnt += 1;
 	var printer = defaultmsg;
 	var interacted = 0;
 	
@@ -264,7 +277,7 @@ function resp (str, senderNumber, senderName, chatname) {
 	if (str.indexOf(defaultmsg.substring(0,13)) == -1 && waitforclever == 0) { //IF MESSAGE IS NOT FROM THE BOT ITSELF
 		if (str.substring(0, prefix.length).toLowerCase() == prefix.toLowerCase()) {
 			interacted = 1;
-			str = str.substring (prefix.length + 1, 512); //TRIM INPUT
+			str = str.substring (prefix.length + 1, 4196); //TRIM INPUT
 			str = str.trim();
 			
 			if (str.substring(0, 4).toLowerCase() == "help") {
@@ -376,17 +389,21 @@ function resp (str, senderNumber, senderName, chatname) {
 				} else {
 					GeneralXMLHTTPRequest.open("GET", "https://cors-anywhere.herokuapp.com/https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
 					GeneralXMLHTTPRequest.send();
-					var responser = GeneralXMLHTTPRequest.responseText;
-					if (responser.indexOf ("Ai stricat pagina,") != -1) {
-						printer += "Could not find " + str + " city.";
+					if (GeneralXMLHTTPRequest.status != 200) {
+						printer += "Your input *" + str + "* is invalid";
 					} else {
-						var n = responser.indexOf("class=\"oras\"");
-						responser = responser.substring (n + 13);
-						var astre = responser.indexOf("Astrele");
-						var fin = responser.indexOf("Alege");
-						printer += responser.substring(0, astre);
-						printer += "\n\n";
-						printer += responser.substring(astre, fin);
+						var responser = GeneralXMLHTTPRequest.responseText;
+						if (responser.indexOf ("Ai stricat pagina,") != -1) {
+							printer += "Could not find " + str + " city.";
+						} else {
+							var n = responser.indexOf("class=\"oras\"");
+							responser = responser.substring (n + 13);
+							var astre = responser.indexOf("Astrele");
+							var fin = responser.indexOf("Alege");
+							printer += responser.substring(0, astre);
+							printer += "\n\n";
+							printer += responser.substring(astre, fin);
+						}
 					}
 				}
 				
@@ -406,62 +423,73 @@ function resp (str, senderNumber, senderName, chatname) {
 				var url = "https://www.wolframalpha.com/input/apiExplorer.jsp?input=" + encodeURIComponent(str) + "&format=minput,plaintext&output=JSON&type=full";
 				GeneralXMLHTTPRequest.open("GET", url, false);
 				GeneralXMLHTTPRequest.send();
-				var responser = GeneralXMLHTTPRequest.responseText;
-				n = responser.indexOf("\"success\":");
-				responser = responser.substring(n + 11);
-
-				if (responser.substring(0, 5) == "false") {
-					printer += "Sorry, I did not understand the question.";
+				
+				if (GeneralXMLHTTPRequest.status != 200) {
+					printer += "Your input *" + str + "* is invalid";
 				} else {
-					n = responser.indexOf("title");
-					var lastTitle = n;
-					while (lastTitle != -1) {
-						responser = responser.substring(n + 9);
+					var responser = GeneralXMLHTTPRequest.responseText;
+					n = responser.indexOf("\"success\":");
+					responser = responser.substring(n + 11);
 
-						fin = responser.indexOf ("\"");
-						var title = responser.substring(0, fin);
-						if (title == "" || title == "Image" || title == "Timeline" || title == "Wikipedia page hits history" || title == "Number line" || title == "Manipulatives illustration" || title == "Illustration" || title == "Estimated current age distribution" || title == "History for births" || title == "Structure diagram" || title == "3D structure") {
-
-						} else {
-							printer += "*" + title + "*";
-							printer += "\n";
-						}
-
-						n = responser.indexOf("plaintext");
-						responser = responser.substring(n + 13);
-						n = responser.indexOf("\"");
-						var wolfmsg = responser.substring(0, n).replace(RegExp("\\\\n", 'g'), "\n");
-						if (wolfmsg != "") {
-							printer += wolfmsg;
-							printer += "\n\n";
-						}
+					if (responser.substring(0, 5) == "false") {
+						printer += "Sorry, I did not understand the question.";
+					} else {
 						n = responser.indexOf("title");
-						lastTitle = n;
+						var lastTitle = n;
+						while (lastTitle != -1) {
+							responser = responser.substring(n + 9);
+
+							fin = responser.indexOf ("\"");
+							var title = responser.substring(0, fin);
+							if (title == "" || title == "Image" || title == "Timeline" || title == "Wikipedia page hits history" || title == "Number line" || title == "Manipulatives illustration" || title == "Illustration" || title == "Estimated current age distribution" || title == "History for births" || title == "Structure diagram" || title == "3D structure") {
+
+							} else {
+								printer += "*" + title + "*";
+								printer += "\n";
+							}
+
+							n = responser.indexOf("plaintext");
+							responser = responser.substring(n + 13);
+							n = responser.indexOf("\"");
+							var wolfmsg = responser.substring(0, n).replace(RegExp("\\\\n", 'g'), "\n");
+							if (wolfmsg != "") {
+								printer += wolfmsg;
+								printer += "\n\n";
+							}
+							n = responser.indexOf("title");
+							lastTitle = n;
+						}
+					}
+					if (printer.indexOf ("current geoIP location") != -1) {
+						printer = defaultmsg + "Sorry, I did not understand the question.";
 					}
 				}
-				if (printer.indexOf ("current geoIP location") != -1) {
-					printer = defaultmsg + "Sorry, I did not understand the question.";
-				}
-				
 			} else if (str.substring(0, 5).toLowerCase() == "quote") {
 				GeneralXMLHTTPRequest.open("GET", "https://talaikis.com/api/quotes/random/", false);
 				GeneralXMLHTTPRequest.send();
-				var responser = GeneralXMLHTTPRequest.responseText;
-				var obj = JSON.parse(responser);
+				if (GeneralXMLHTTPRequest.status != 200) {
+					printer += "Your input *" + str + "* is invalid";
+				} else {
+					var responser = GeneralXMLHTTPRequest.responseText;
+					var obj = JSON.parse(responser);
 
-				printer += "*Quote By*: " + obj["author"] + "\n\n";
-				printer += "_" + obj["quote"] + "_" + "\n";
-				
+					printer += "*Quote By*: " + obj["author"] + "\n\n";
+					printer += "_" + obj["quote"] + "_" + "\n";
+				}
 			} else if (str.substring(0, 4).toLowerCase() == "joke") {
 				GeneralXMLHTTPRequest.open("GET", "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke", false);
 				GeneralXMLHTTPRequest.send();
-				var responser = GeneralXMLHTTPRequest.responseText;
-				var obj = JSON.parse(responser);
-				printer += jokereplies[Math.floor(Math.random() * jokereplies.length)];
-				printer += "\n\n";
-				printer += "*" + obj["setup"] + "*";
-				printer += "\n";
-				printer += "_" + obj["punchline"] + "_";
+				if (GeneralXMLHTTPRequest.status != 200) {
+					printer += "Your input *" + str + "* is invalid";
+				} else {
+					var responser = GeneralXMLHTTPRequest.responseText;
+					var obj = JSON.parse(responser);
+					printer += jokereplies[Math.floor(Math.random() * jokereplies.length)];
+					printer += "\n\n";
+					printer += "*" + obj["setup"] + "*";
+					printer += "\n";
+					printer += "_" + obj["punchline"] + "_";
+				}
 				
 			} else if (str.substring(0, 8).toLowerCase() == "sendmail") {
 				str = str.substring(9);
@@ -507,9 +535,13 @@ function resp (str, senderNumber, senderName, chatname) {
 						} else {
 							GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=0&frm=" + encodeURIComponent(frm) + "&to=" + encodeURIComponent(to) + "&msg=" + encodeURIComponent(msg), false);
 							GeneralXMLHTTPRequest.send();
-							sent = 1;
-							lastmail = Date.now();
-							printer += "Mail sent!\n\nFrom: *" + frm + "*\n" + "To: *" + to + "*";
+							if (GeneralXMLHTTPRequest.status != 200) {
+								printer += "Your input *" + str + "* is invalid";
+							} else {
+								sent = 1;
+								lastmail = Date.now();
+								printer += "Mail sent!\n\nFrom: *" + frm + "*\n" + "To: *" + to + "*";
+							}
 						}
 					}
 				}
@@ -523,28 +555,32 @@ function resp (str, senderNumber, senderName, chatname) {
 				
 				GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/definitie/" + encodeURIComponent(str) + "?format=json", false);
 				GeneralXMLHTTPRequest.send();
-				var obj = JSON.parse(GeneralXMLHTTPRequest.responseText);
-				var defs = obj["definitions"];
-				
-				if (defs.length == 0) {
-					printer += "Sorry, the requested word: *" + str + "* doesn't exist.";
+				if (GeneralXMLHTTPRequest.status != 200) {
+					printer += "Your input *" + str + "* is invalid";
 				} else {
-					printer += "*" + str.toUpperCase() + "*\n";
+					var obj = JSON.parse(GeneralXMLHTTPRequest.responseText);
+					var defs = obj["definitions"];
 					
-					var defcount = 5;
-					if (defs.length < 5)
-						defcount = defs.length;
-					
-					if (defcount == 1)
-						printer += "Posting the only *1* definition:\n\n";
-					else
-						printer += "Posting the first *" + defcount + "* definitions:\n\n";
-					
-					for (var i = 0; i < defcount; i++) {
-						printer += (i + 1) + ". ";
-						DefinitionCobai.innerHTML = defs[i]["htmlRep"]; //Strip HTML Tags
-						printer += DefinitionCobai.innerText + "\n";
-						printer += "*sursa:* " + defs[i].sourceName + ", *adaugata de:* " + defs[i].userNick + "\n\n";
+					if (defs.length == 0) {
+						printer += "Sorry, the requested word: *" + str + "* doesn't exist.";
+					} else {
+						printer += "*" + str.toUpperCase() + "*\n";
+						
+						var defcount = 5;
+						if (defs.length < 5)
+							defcount = defs.length;
+						
+						if (defcount == 1)
+							printer += "Posting the only *1* definition:\n\n";
+						else
+							printer += "Posting the first *" + defcount + "* definitions:\n\n";
+						
+						for (var i = 0; i < defcount; i++) {
+							printer += (i + 1) + ". ";
+							DefinitionCobai.innerHTML = defs[i]["htmlRep"]; //Strip HTML Tags
+							printer += DefinitionCobai.innerText + "\n";
+							printer += "*sursa:* " + defs[i].sourceName + ", *adaugata de:* " + defs[i].userNick + "\n\n";
+						}
 					}
 				}
 			} else if (str.substring(0, 7).toLowerCase() == "hangman") {
@@ -557,14 +593,16 @@ function resp (str, senderNumber, senderName, chatname) {
 					
 					GeneralXMLHTTPRequest.open("GET", "https://dexonline.ro/ajax/randomWord.php", false);
 					GeneralXMLHTTPRequest.send();
+					if (GeneralXMLHTTPRequest.status != 200) {
+						printer += "Your input *" + str + "* is invalid";
+					} else {
+						var word = GeneralXMLHTTPRequest.responseText.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+						hangman[chatname] = {word: word, guesses: ""};
 						
-					var word = GeneralXMLHTTPRequest.responseText.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-					hangman[chatname] = {word: word, guesses: ""};
-					
-					printer += "Alright, let's play! Word is in: *Romanian*. You got *" + 6 + "* tries.\n\n";
-					for (var i = 0; i < word.length; i++)
-						printer += "_ ";
-					
+						printer += "Alright, let's play! Word is in: *Romanian*. You got *" + 6 + "* tries.\n\n";
+						for (var i = 0; i < word.length; i++)
+							printer += "_ ";
+					}
 				} else if (str.toLowerCase() == "en") {
 					if (hangman[chatname] != null) {
 						printer += "Nuking current Hangman session...\n";
@@ -572,17 +610,19 @@ function resp (str, senderNumber, senderName, chatname) {
 					
 					GeneralXMLHTTPRequest.open("GET", "https://randomword.com/", false);
 					GeneralXMLHTTPRequest.send();
+					if (GeneralXMLHTTPRequest.status != 200) {
+						printer += "Your input *" + str + "* is invalid";
+					} else {
+						var word = GeneralXMLHTTPRequest.responseText.split('"random_word"')[1];
+						word = word.substring(1, word.indexOf("<"));
+						word = word.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
+							
+						hangman[chatname] = {word: word, guesses: ""};
 						
-					var word = GeneralXMLHTTPRequest.responseText.split('"random_word"')[1];
-					word = word.substring(1, word.indexOf("<"));
-					word = word.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase();
-						
-					hangman[chatname] = {word: word, guesses: ""};
-					
-					printer += "Alright, let's play! Word is in: *English*. You got *" + 6 + "* tries.\n\n";
-					for (var i = 0; i < word.length; i++)
-						printer += "_ ";
-					
+						printer += "Alright, let's play! Word is in: *English*. You got *" + 6 + "* tries.\n\n";
+						for (var i = 0; i < word.length; i++)
+							printer += "_ ";
+					}
 				} else if (str.toLowerCase() == "reset") {
 					hangman[chatname] = null;
 					printer += "The current Hangman Session has been reset! Type *" + prefix + " hangman EN / RO* to choose a new word.";
@@ -598,7 +638,60 @@ function resp (str, senderNumber, senderName, chatname) {
 					printer += "Your phone number is: *" + senderNumber + "*\n";
 					if (points[senderNumber] == null)
 						points[senderNumber] = 0;
-					printer += "Shushhh... Secret feature: You have *" + points[senderNumber] + "* points.\n";
+					printer += "You have *" + points[senderNumber] + "* points.\n";
+				}
+			} else if (str.substring(0, 5).toLowerCase() == "whois") {
+				str = str.substring(6);
+				
+				if (senderName == null) {
+					printer += "I can't get the info, sorry.";
+				} else {
+					DefinitionCobai.innerHTML = str;
+					if (DefinitionCobai.querySelector("span.matched-mention") != null) { //If there's a mention in there
+						var name = DefinitionCobai.querySelector("span.matched-mention").innerText.substring(1).trim();
+						document.querySelector("#main > header > div._1WBXd").click(); //Open group menu
+						console.log (name);
+						
+						var scroller = document.querySelector("#app > div > div > div.MZIyP > div._3q4NP._2yeJ5 > span > div > span > div > div");
+						var done = false;
+						
+						if (scroller == null) {
+							console.log ("OMG NO");
+						} else {
+							for (var k = 250; k <= 7500 && !done; k += 250) {
+								scroller.scroll(0, k);
+								
+								var members = document.querySelector("#app > div > div > div.MZIyP > div._3q4NP._2yeJ5 > span > div > span > div > div > div > div:nth-child(5) > div:nth-last-child(1) > div").children;
+								
+								for (var i = 0; i < members.length; i++) {
+									var phonenumber = members[i].querySelector("div > div > div._3j7s9 > div._2FBdJ > div > span > span").innerText;
+									var showname = members[i].querySelector("div > div > div._3j7s9 > div._1AwDx > div._3Bxar").innerText;
+									
+									if (showname == name || phonenumber == name) {
+										if (showname != null) {
+											printer += "Their name is: *" + showname + "*\n";
+										}
+										
+										printer += "Their phone number is: *" + phonenumber + "*\n";
+										if (points[phonenumber] == null)
+											points[phonenumber] = 0;
+										printer += "They have *" + points[phonenumber] + "* points.";
+										done = true;
+										break;
+									}
+								}
+							}
+						}
+						if (done == false) {
+							printer += "Sorry, I could not find the person... Somehow.";
+						}
+						
+						if (document.querySelector("#app > div > div > div.MZIyP > div._3q4NP._2yeJ5 > span > div > span > div > header > div > div.SFEHG > button") != null) {
+							document.querySelector("#app > div > div > div.MZIyP > div._3q4NP._2yeJ5 > span > div > span > div > header > div > div.SFEHG > button").click();
+						}
+					} else {
+						printer += "Please @ someone too, so I can see their profile!";
+					}
 				}
 			} else if (str.substring(0, 3).toLowerCase() == "inc") {
 				if (senderName == null) {
@@ -661,33 +754,30 @@ function resp (str, senderNumber, senderName, chatname) {
 					printer += dumbreplies[Math.floor(Math.random() * dumbreplies.length)];
 				}
 			} else { //asume chatting
+				DefinitionCobai.innerHTML = str; //clear msg
+				str = DefinitionCobai.innerText;
+						
 				if (usedumb == 0) {
 					document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
 					waitforclever = 1;
 					clever = setInterval(clevercheck, 100);
-				} else {
-					GeneralXMLHTTPRequest.open("POST", "https://miapi.pandorabots.com/talk?botkey=n0M6dW2XZacnOgCWTp0FRaadjiO5TASZD_5OKHTs9hqAp62JnACkE6BQdHSvL1lL7jiC3vL-JS0~&input=" + encodeURIComponent(str) + "&client_name=cw166920b4772&sessionid=402737884&channel=6", false);
-					GeneralXMLHTTPRequest.send();
-					var responser = GeneralXMLHTTPRequest.responseText;
-					var obj = JSON.parse(responser);
-					printer = obj["responses"][0];
-				}
+				} else
+					printer = getMitsukuResponse(str);
 			}
 		} else if (str.substring(0,1).toLowerCase() == "!") { //interpret as msg
 			str = str.substring(1);
+			DefinitionCobai.innerHTML = str; //clear msg
+			str = DefinitionCobai.innerText;
+			
 			interacted = 1;
 			
 			if (usedumb == 0) {
 				document.querySelector("#app > iframe").contentWindow.cleverbot.sendAI(str);
 				waitforclever = 1;
 				clever = setInterval(clevercheck, 100);
-			} else {
-				GeneralXMLHTTPRequest.open("POST", "https://miapi.pandorabots.com/talk?botkey=n0M6dW2XZacnOgCWTp0FRaadjiO5TASZD_5OKHTs9hqAp62JnACkE6BQdHSvL1lL7jiC3vL-JS0~&input=" + encodeURIComponent(str) + "&client_name=cw166920b4772&sessionid=402737884&channel=6", false);
-				GeneralXMLHTTPRequest.send();
-				var responser = GeneralXMLHTTPRequest.responseText;
-				var obj = JSON.parse(responser);
-				printer = obj["responses"][0];
-			}
+			} else
+				printer = getMitsukuResponse(str);
+			
 		} else if (interacted != 1) {
 			if (hangman[chatname] != null) {
 				if (str.length == 1) {
@@ -750,6 +840,9 @@ function resp (str, senderNumber, senderName, chatname) {
 					}
 				}
 			} else {
+				DefinitionCobai.innerHTML = str; //clear msg
+				str = DefinitionCobai.innerText;
+				
 				var resp = responsechance;
 				if (respchances[chatname] != null)
 					resp = respchances[chatname];
@@ -767,13 +860,58 @@ function resp (str, senderNumber, senderName, chatname) {
 	if (interacted == 1 && waitforclever == 0) {
 		if (printer == defaultmsg)
 			printer += "Your input: *" + str + "* did not return anything from the LunaBot engine.";
-	
+		
 		sendmsg(printer);
 		
 		if (restart == 1) {
 			restart = 0;
-			setTimeout(function(){ document.location.reload(); }, 3000);
+			setTimeout(function(){ GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=3", false); GeneralXMLHTTPRequest.send(); }, 3000);
 		}
+	}
+	
+	//Erase each 50 MSGs
+	if (cnt == 50) {
+		cnt = 0;
+		try {
+			document.querySelector("#main > header > div._1i0-u > div > div:nth-child(3) > div").dispatchEvent(ClickEvent);
+			document.querySelector("#main > header > div._1i0-u > div > div.rAUz7._3TbsN > span > div > ul > li:nth-child(4)").dispatchEvent(ClickEvent);
+			document.querySelector("#main > header > div._1i0-u > div > div.rAUz7._3TbsN > span > div > ul > li:nth-child(4) > div").click();
+			document.querySelector("#app > div > span:nth-child(3) > div > div > div > div > div > div > div._3QNwO > div._1WZqU.PNlAR").click();
+		} catch (err) {
+			
+		}
+	}
+}
+
+function getMitsukuResponse (str) {
+	GeneralXMLHTTPRequest.open("POST", "https://miapi.pandorabots.com/talk?botkey=n0M6dW2XZacnOgCWTp0FRaadjiO5TASZD_5OKHTs9hqAp62JnACkE6BQdHSvL1lL7jiC3vL-JS0~&input=" + encodeURIComponent(str.replace(/luna/gi, "Mitsuku")) + "&client_name=cw166ad198f3f&sessionid=402747697&channel=6", false);
+	GeneralXMLHTTPRequest.send();
+	
+	if (GeneralXMLHTTPRequest.status != 200) {
+		return defaultmsg + "Your input *" + str + "* is invalid";
+	} else {
+		var responser = GeneralXMLHTTPRequest.responseText;
+		var obj = JSON.parse(responser);
+		
+		var tempres = obj["responses"][0];
+		tempres = tempres.replace(/\r?\n|\r/g, " ");
+		tempres = tempres.replace(/\t/g, " ");
+		tempres = tempres.replace(/mitsuku/gi, "Luna");
+		tempres = tempres.replace(/mousebreaker/gi, "Amy");
+		
+		var ret = tempres[0]; //First Char
+		
+		for (var i = 1; i < tempres.length; i++) {
+			if (tempres[i] == " ") {
+				if (tempres[i] != tempres[i - 1]) {
+					ret += " ";
+				}
+			} else {
+				ret += tempres[i];
+			}
+		}
+		
+		return ret;
 	}
 }
 
