@@ -12,7 +12,7 @@
     'use strict';
 
 //GLOBALS//
-var VersionNumber = "3.7rc3";
+var VersionNumber = "3.7";
 
 var initer = setInterval(init, 1000);
 var initialized = 0;
@@ -212,42 +212,51 @@ function retryengage (reqchat, destchat) {
 }
 
 function engage (reqchatname, destinationchat) {
-	switchfreeze = 1;
-    var chatname = document.querySelector("#main > header > div._1WBXd > div._2EbF- > div > span");
-	
-	if (chatname == null) { //retry
-		setTimeout(retryengage, RetryTime, reqchatname, destinationchat);
-		return;
-	}
-	
-	chatname = chatname.innerText.substring(0,26).trim(); //GET CHATNAME
-	
-	if (reqchatname != chatname) {
-		destinationchat.dispatchEvent(ClickEvent);
-		setTimeout(retryengage, RetryTime, reqchatname, destinationchat);
-		return;
-	}
-	
-	var newmsg = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div:nth-last-child(1) > div > div > div.copyable-text > div > span");
-	var msgcount = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa").children.length;
-	
-	var number;
-	var name;
-	
-	for (var i = 1; i <= msgcount; i++) {
-		var msgbody = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa > div:nth-last-child(" + i + ")");
-		var msgnumber = msgbody.querySelector("div > div > div._2lc14 > span.RZ7GO");
+	try {
+		switchfreeze = 1;
+		var chatname = document.querySelector("#main > header > div._1WBXd > div._2EbF- > div > span");
 		
-		if (msgnumber != null) {
-			number = msgnumber.innerHTML;
-			name = msgbody.querySelector("span._1wjpf").innerHTML;
-			break;
+		if (chatname == null) { //retry
+			setTimeout(retryengage, RetryTime, reqchatname, destinationchat);
+			return;
 		}
+		
+		chatname = chatname.innerText.substring(0,26).trim(); //GET CHATNAME
+		
+		if (reqchatname != chatname) {
+			destinationchat.dispatchEvent(ClickEvent);
+			setTimeout(retryengage, RetryTime, reqchatname, destinationchat);
+			return;
+		}
+		
+		var newmsg = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div:nth-last-child(1) > div > div > div.copyable-text > div > span");
+		var msgcount = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa").children.length;
+		
+		var number;
+		var name;
+		
+		for (var i = 1; i <= msgcount; i++) { //Get Sender Info
+			var msgbody = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa > div:nth-last-child(" + i + ")");
+			var msgnumber = msgbody.querySelector("div > div > div._2lc14 > span.RZ7GO");
+			var msgname = msgbody.querySelector("span._1wjpf");
+			
+			if (msgnumber != null) {
+				if (msgnumber != null)
+					number = msgnumber.innerHTML;
+				
+				if (msgname != null)
+					name = msgname.innerHTML;
+				break;
+			}
+		}
+		
+		if (newmsg != null)
+			resp (newmsg.innerHTML, number, name, chatname);
+		
+		switchfreeze = 0;
+	} catch (err) {
+		console.log("ENGAGE ERROR: " + err);
 	}
-	
-	if (newmsg != null)
-		resp (newmsg.innerHTML, number, name, chatname);
-	switchfreeze = 0;
 }
 
 function sleep(temp) {
@@ -259,6 +268,7 @@ function sleep(temp) {
 }
 
 async function resp (str, senderNumber, senderName, chatname) {
+	try {
 	cnt += 1;
 	var printer = defaultmsg;
 	var interacted = 0;
@@ -880,6 +890,9 @@ async function resp (str, senderNumber, senderName, chatname) {
 		} catch (err) {
 			
 		}
+	}
+	} catch (err) {
+		console.log("RESP ERROR: " + err);
 	}
 }
 
