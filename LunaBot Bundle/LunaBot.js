@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.7
+// @version      3.8
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -12,7 +12,7 @@
     'use strict';
 
 //GLOBALS//
-var VersionNumber = "3.7";
+var VersionNumber = "3.8";
 
 var initer = setInterval(init, 1000);
 var initialized = 0;
@@ -48,6 +48,10 @@ var awake = ["Yes?", "I'm here", "Listening"];
 
 var smartreplies = ["The square root of 145924 is 382.", "Thanks! Now I'm so smart I can build my own bot to do all the hard work! <3", "I'm so smart I already know what you want to say. All the time.", "Imagine if you were as smart as I am now.", "I'm die SMARTEST", "Computing... Ah yes, the meaning of life! Found it.", ">Insert cheeky quote about being smart here<"];
 var dumbreplies = ["Hurr Durr", "I think. I guess. I don't know.", "hurghgrughrgu...", "Ow my head", "head hurty...", "I... can't think stroight", "I WANT CANDyyyyy", ";-;", "Hi! >Random quote unrelated to the whole darn subject because I'm so dumb now<"];
+
+var goodfortunes = ["Excellent Luck", "ｷﾀ━━━━━━(ﾟ∀ﾟ)━━━━━━ !!!!", "Good news will come to you by mail", "You will meet a dark handsome stranger", "Outlook good", "Godly Luck"];
+var mediumfortunes = ["Good Luck", "Average Luck", "Better not tell you now"];
+var badfortunes = ["Reply hazy, try again", "Bad Luck", "（　´_ゝ`）ﾌｰﾝ", "Very Bad Luck"];
 
 var respchances = {};
 var hangman = {};
@@ -303,7 +307,9 @@ async function resp (str, senderNumber, senderName, chatname) {
 				printer += "*" + prefix + " quote:* Get a random quote\n";
 				printer += "*" + prefix + " joke:* Laugh a bit!\n";
 				printer += "*" + prefix + " whoami:* Show sender info.\n";
-				printer += "*" + prefix + " responsechance _integer_*: Change the random response chance for this group.\n";
+				printer += "*" + prefix + " whois @user:* Show user info.\n";
+				printer += "*" + prefix + " fortune:* Ask the magic cookie what is your fortune.\n";
+				//printer += "*" + prefix + " responsechance _integer_*: Change the random response chance for this group.\n";
 
 				printer += "\n\n\n_Let me know how I'm doing by replying with *good bot*/*headpat* if I did something nice, or with *bad bot*/*critique* if I did something silly._\n\n";
 				printer += "*In this update:*\n";
@@ -715,7 +721,18 @@ async function resp (str, senderNumber, senderName, chatname) {
 					printer += "Now you have: *" + points[senderNumber] + "* points.";
 					updateUser(senderNumber, points[senderNumber]);
 				}
-			} else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
+			} else if (str.substring(0, 7).toLowerCase() == "fortune") {
+				printer += "Your fortune: ";
+				var choice = Math.floor(Math.random() * 4);
+				
+				if (choice == 0) {
+					printer += "*" + goodfortunes[Math.floor(Math.random() * goodfortunes.length)] + "*";
+				} else if (choice == 1) {
+					printer += mediumfortunes[Math.floor(Math.random() * mediumfortunes.length)];
+				} else if (choice == 2) {
+					printer += "_" + badfortunes[Math.floor(Math.random() * badfortunes.length)] + "_";
+				}
+			}else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
 				if (chatname != debuggroupname) {
 					printer += "Sorry, debug features are only allowed on my debug group.";
 				} else {
@@ -808,6 +825,12 @@ async function resp (str, senderNumber, senderName, chatname) {
 							printer += "Correct Guess: *" + str.toUpperCase() + "*!\n\n";
 							hangman[chatname].guesses += str.toUpperCase(); //Correct Guess: Uppercase
 							word = word.split(str).join(str.toUpperCase());
+							
+							if (points[senderNumber] == null) {
+								points[senderNumber] = 0;
+							}
+							
+							updateUser(senderNumber, points[senderNumber] + 1);
 						}
 						
 						hangman[chatname].word = word;
