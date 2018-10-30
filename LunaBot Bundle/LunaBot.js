@@ -830,7 +830,8 @@ async function resp (str, senderNumber, senderName, chatname) {
 								points[senderNumber] = 0;
 							}
 							
-							updateUser(senderNumber, points[senderNumber] + 1);
+							points[senderNumber] += 1;
+							updateUser(senderNumber, points[senderNumber]);
 						}
 						
 						hangman[chatname].word = word;
