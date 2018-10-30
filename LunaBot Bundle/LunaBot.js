@@ -403,7 +403,7 @@ async function resp (str, senderNumber, senderName, chatname) {
 				if (str.length == 0) {
 					printer += "Usage: " + prefix + " weather City";
 				} else {
-					GeneralXMLHTTPRequest.open("GET", "https://cors-anywhere.herokuapp.com/https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
+					GeneralXMLHTTPRequest.open("GET", "https://vremeainpulamea.sirb.net/?oras=" + encodeURIComponent(str.normalize('NFD').replace(/[\u0300-\u036f]/g, "")), false);
 					GeneralXMLHTTPRequest.send();
 					if (GeneralXMLHTTPRequest.status != 200) {
 						printer += "Your input *" + str + "* is invalid";
@@ -723,7 +723,7 @@ async function resp (str, senderNumber, senderName, chatname) {
 				}
 			} else if (str.substring(0, 7).toLowerCase() == "fortune") {
 				printer += "Your fortune: ";
-				var choice = Math.floor(Math.random() * 4);
+				var choice = Math.floor(Math.random() * 3);
 				
 				if (choice == 0) {
 					printer += "*" + goodfortunes[Math.floor(Math.random() * goodfortunes.length)] + "*";
