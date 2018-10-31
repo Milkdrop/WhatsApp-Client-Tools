@@ -16,7 +16,7 @@ var VersionNumber = "3.8";
 
 var initer = setInterval(init, 1000);
 var initialized = 0;
-var refr = setInterval(refresher, 14400000);
+var refr = setInterval(refresher, 3600000);
 
 var RetryTime = 50;
 
