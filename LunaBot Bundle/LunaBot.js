@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.8
+// @version      3.9
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -12,11 +12,11 @@
     'use strict';
 
 //GLOBALS//
-var VersionNumber = "3.8";
+var VersionNumber = "3.9rc1";
 
 var initer = setInterval(init, 1000);
 var initialized = 0;
-var refr = setInterval(refresher, 3600000);
+var refr = setInterval(refresher, 7200000);
 
 var RetryTime = 50;
 
@@ -94,6 +94,7 @@ function init() {
 		//Spawn the Clever boi
 		var ifrm = document.createElement("iframe");
         ifrm.setAttribute("src", "https://www.cleverbot.com/");
+		ifrm.setAttribute("sandbox", "allow-same-origin allow-scripts");
         ifrm.style.width = "0px";
         ifrm.style.height = "0px";
         document.querySelector("#app").appendChild(ifrm);
@@ -111,34 +112,46 @@ function init() {
 }
 
 function updateUser (uid, pts) {
-	uid = uid.split(' ').join('_');
-	GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=2&type=DATA&id=" + encodeURIComponent(uid) + "&pts=" + pts);
-	GeneralXMLHTTPRequest.send();
+	try {
+		uid = uid.split(' ').join('_');
+		GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=2&type=DATA&id=" + encodeURIComponent(uid) + "&pts=" + pts);
+		GeneralXMLHTTPRequest.send();
+	} catch (err) {
+		console.log ("Backend is not running.");
+	}
 }
 
 function loadSettings () {
-	GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=1", false);
-	GeneralXMLHTTPRequest.send();
-	if (GeneralXMLHTTPRequest.status == 200) {
-		var responser = GeneralXMLHTTPRequest.responseText.split('\n');
-		
-		var responselines = responser.length;
-		
-		for (var i = 0; i < responselines; i++) {
-			var line = responser[i];
-			line = line.split(' ');
-			if (line[0] == "DATA") {
-				var id = line[1].split('_').join(' ');
-				points[id] = parseInt(line[2]);
+	try {
+		GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=1", false);
+		GeneralXMLHTTPRequest.send();
+		if (GeneralXMLHTTPRequest.status == 200) {
+			var responser = GeneralXMLHTTPRequest.responseText.split('\n');
+			
+			var responselines = responser.length;
+			
+			for (var i = 0; i < responselines; i++) {
+				var line = responser[i];
+				line = line.split(' ');
+				if (line[0] == "DATA") {
+					var id = line[1].split('_').join(' ');
+					points[id] = parseInt(line[2]);
+				}
 			}
 		}
+	} catch (err) {
+		console.log ("Backend is not running.");
 	}
 }
 
 function refresher() {
 	if (initialized == 1) {
-		GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=3", false);
-		GeneralXMLHTTPRequest.send();
+		try {
+			GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=3", false);
+			GeneralXMLHTTPRequest.send();
+		} catch (err) {
+			console.log ("Backend is not running.");
+		}
 	}
 }
 
@@ -232,6 +245,9 @@ function engage (reqchatname, destinationchat) {
 			setTimeout(retryengage, RetryTime, reqchatname, destinationchat);
 			return;
 		}
+		
+		//SCROLL DOWN TO BOTTOM
+		document.querySelector("#main > div._3zJZ2 > div > div").scroll(0,10000);
 		
 		var newmsg = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div:nth-last-child(1) > div > div > div.copyable-text > div > span");
 		var msgcount = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa").children.length;
@@ -899,7 +915,7 @@ async function resp (str, senderNumber, senderName, chatname) {
 		
 		if (restart == 1) {
 			restart = 0;
-			setTimeout(function(){ GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=3", false); GeneralXMLHTTPRequest.send(); }, 3000);
+			setTimeout(function(){ try {GeneralXMLHTTPRequest.open("GET", "http://127.0.0.1:2000/?op=3", false); GeneralXMLHTTPRequest.send(); } catch (err) {}}, 3000);
 		}
 	}
 	
