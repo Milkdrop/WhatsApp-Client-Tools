@@ -2,7 +2,8 @@
 For LunaBot:
 - Install TamperMonkey and paste the userscript in there, for ease of use. (remember to make it to not interfere with CSP)
 - Set the Content-Security-Policy response header to ```default-src *; report-uri https://dyn.web.whatsapp.com/cspv; script-src * 'unsafe-eval'; connect-src *; img-src * data: blob:; style-src 'self' 'unsafe-inline' *; font-src *; media-src * blob:; child-src *```
-- Add a custom refferer=https://products.wolframalpha.com/api/explorer/ for http://www.wolframalpha.com
+- Add a custom refferer=https://products.wolframalpha.com/api/explorer/ for http://www.wolframalpha.com/*
+- Add a custom refferer=https://pandorabots.com/mitsuku/ for https://miapi.pandorabots.com/*
 - Allow Mixed Content
 - Run your browser with the following parameters: **chromium --user-data-dir="LunaBot" --disable-web-security**
 - Also you have to manually set the Origin header as 	https://web.whatsapp.com
