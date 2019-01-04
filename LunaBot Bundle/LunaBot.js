@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LunaBot
 // @namespace    http://tampermonkey.net/
-// @version      3.9
+// @version      4.0
 // @description  A funky bot
 // @author       Loona
 // @match        https://web.whatsapp.com/
@@ -12,7 +12,7 @@
     'use strict';
 
 //GLOBALS//
-var VersionNumber = "3.9rc1";
+var VersionNumber = "4.0";
 
 var initer = setInterval(init, 1000);
 var initialized = 0;
@@ -49,9 +49,9 @@ var awake = ["Yes?", "I'm here", "Listening"];
 var smartreplies = ["The square root of 145924 is 382.", "Thanks! Now I'm so smart I can build my own bot to do all the hard work! <3", "I'm so smart I already know what you want to say. All the time.", "Imagine if you were as smart as I am now.", "I'm die SMARTEST", "Computing... Ah yes, the meaning of life! Found it.", ">Insert cheeky quote about being smart here<"];
 var dumbreplies = ["Hurr Durr", "I think. I guess. I don't know.", "hurghgrughrgu...", "Ow my head", "head hurty...", "I... can't think stroight", "I WANT CANDyyyyy", ";-;", "Hi! >Random quote unrelated to the whole darn subject because I'm so dumb now<"];
 
-var goodfortunes = ["Excellent Luck", "ｷﾀ━━━━━━(ﾟ∀ﾟ)━━━━━━ !!!!", "Good news will come to you by mail", "You will meet a dark handsome stranger", "Outlook good", "Godly Luck"];
+var goodfortunes = ["Excellent Luck", "Good news will come to you by mail", "You will meet a dark handsome stranger", "Outlook good", "Godly Luck"];
 var mediumfortunes = ["Good Luck", "Average Luck", "Better not tell you now"];
-var badfortunes = ["Reply hazy, try again", "Bad Luck", "（　´_ゝ`）ﾌｰﾝ", "Very Bad Luck"];
+var badfortunes = ["Reply hazy, try again", "Bad Luck", "Very Bad Luck"];
 
 var respchances = {};
 var hangman = {};
@@ -92,12 +92,12 @@ function init() {
 		});
 		
 		//Spawn the Clever boi
-		var ifrm = document.createElement("iframe");
+		/*var ifrm = document.createElement("iframe");
         ifrm.setAttribute("src", "https://www.cleverbot.com/");
 		ifrm.setAttribute("sandbox", "allow-same-origin allow-scripts");
         ifrm.style.width = "0px";
         ifrm.style.height = "0px";
-        document.querySelector("#app").appendChild(ifrm);
+        document.querySelector("#app").appendChild(ifrm);*/
 		
 		boottime = Date.now();
 		DefinitionCobai = document.createElement("div");
@@ -135,7 +135,7 @@ function loadSettings () {
 				line = line.split(' ');
 				if (line[0] == "DATA") {
 					var id = line[1].split('_').join(' ');
-					points[id] = parseInt(line[2]);
+					points[id] = parseFloat(line[2]);
 				}
 			}
 		}
@@ -247,7 +247,7 @@ function engage (reqchatname, destinationchat) {
 		}
 		
 		//SCROLL DOWN TO BOTTOM
-		document.querySelector("#main > div._3zJZ2 > div > div").scroll(0,10000);
+		document.querySelector("#main > div._3zJZ2 > div > div").scroll(0, 100000);
 		
 		var newmsg = document.querySelector ("#main > div._3zJZ2 > div.copyable-area > div._2nmDZ > div._9tCEa > div:nth-last-child(1) > div > div > div.copyable-text > div > span");
 		var msgcount = document.querySelector("#main > div._3zJZ2 > div > div > div._9tCEa").children.length;
@@ -320,11 +320,12 @@ async function resp (str, senderNumber, senderName, chatname) {
 				printer += "*" + prefix + " hangman _EN / RO_:* Play a game of Hangman! Works for both ROmanian and ENglish\n";
 				printer += "*" + prefix + " dex _word_:* See the specific definitions of any Romanian word\n";
 				printer += "*" + prefix + " sendmail:* Send an e-mail from any address, to any address, with any message. (I take 0 responsability for any damage done)\n";
+				printer += "*" + prefix + " bet _Amount_ _ChosenNumber_:* Gamble Luna points! Because gambling is fun. And good for the kids.\n";
 				printer += "*" + prefix + " quote:* Get a random quote\n";
 				printer += "*" + prefix + " joke:* Laugh a bit!\n";
 				printer += "*" + prefix + " whoami:* Show sender info.\n";
 				printer += "*" + prefix + " whois @user:* Show user info.\n";
-				printer += "*" + prefix + " fortune:* Ask the magic cookie what is your fortune.\n";
+				printer += "*" + prefix + " fortune:* Ask the magic cookie about your fortune.\n";
 				//printer += "*" + prefix + " responsechance _integer_*: Change the random response chance for this group.\n";
 
 				printer += "\n\n\n_Let me know how I'm doing by replying with *good bot*/*headpat* if I did something nice, or with *bad bot*/*critique* if I did something silly._\n\n";
@@ -403,6 +404,7 @@ async function resp (str, senderNumber, senderName, chatname) {
 				printer += "*" + prefix + " info*: Display config variables.\n";
 				printer += "*" + prefix + " restart*: Restart the LunaBot engine.\n";
 				printer += "*" + prefix + " switchdumb*: Switch between Dumb and Smart chat mode.\n";
+				printer += "*" + prefix + " clear*: Clear the internal message history.\n";
 				printer += "*" + prefix + " changeprefix _newPrefix_*: Change The Prefix\n";
 				
 			} else if (str.length == 0) { //JUST PREFIX
@@ -509,7 +511,7 @@ async function resp (str, senderNumber, senderName, chatname) {
 					printer += "_" + obj["quote"] + "_" + "\n";
 				}
 			} else if (str.substring(0, 4).toLowerCase() == "joke") {
-				GeneralXMLHTTPRequest.open("GET", "https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke", false);
+				GeneralXMLHTTPRequest.open("GET", "https://safe-falls-22549.herokuapp.com/random_joke", false);
 				GeneralXMLHTTPRequest.send();
 				if (GeneralXMLHTTPRequest.status != 200) {
 					printer += "Your input *" + str + "* is invalid";
@@ -725,18 +727,6 @@ async function resp (str, senderNumber, senderName, chatname) {
 						printer += "Please @ someone too, so I can see their profile!";
 					}
 				}
-			} else if (str.substring(0, 3).toLowerCase() == "inc") {
-				if (senderName == null) {
-					printer += "I can't get your info, sorry.";
-				} else {
-					if (points[senderNumber] == null)
-						points[senderNumber] = 0;
-					points[senderNumber] += 1;
-					
-					printer += "Shushhh... Secret feature. Your point count has been increased by one.\n";
-					printer += "Now you have: *" + points[senderNumber] + "* points.";
-					updateUser(senderNumber, points[senderNumber]);
-				}
 			} else if (str.substring(0, 7).toLowerCase() == "fortune") {
 				printer += "Your fortune: ";
 				var choice = Math.floor(Math.random() * 3);
@@ -748,7 +738,88 @@ async function resp (str, senderNumber, senderName, chatname) {
 				} else if (choice == 2) {
 					printer += "_" + badfortunes[Math.floor(Math.random() * badfortunes.length)] + "_";
 				}
-			}else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
+			} else if (str.substring(0, 5).toLowerCase() == "clear") {
+				if (chatname != debuggroupname && false) {
+					printer += "Sorry, debug features are only allowed on my debug group.";
+				} else {
+					str = str.substring(6);
+					eraseMSGs();
+				}
+			} else if (str.substring(0, 9).toLowerCase() == "moneyshot") {
+				if (points[senderNumber] == null)
+					points[senderNumber] = 0;
+				
+				if (points[senderNumber] < 1) {
+					points[senderNumber] = 50;
+					printer += "You got *50 points* as a kickstart :^)";
+					updateUser(senderNumber, points[senderNumber]);
+				} else {
+					printer += "You can only get a moneyshot only if you have *<1 points*.\n";
+					printer += "You currently have: *" + points[senderNumber] + "* points.";
+				}
+			} else if (str.substring(0, 3).toLowerCase() == "bet") {
+				str = str.substring(4);
+				var num1 = str.substring(0, str.indexOf(' '));
+				var num2 = str.substring(str.indexOf(' ') + 1);
+				var success = true;
+				
+				if (num1 != "" && num2 != "") {
+					num1 = parseInt(num1);
+					num2 = parseInt(num2);
+					
+					if (isNaN(num1) == false && isNaN(num2) == false) {
+						var choice = Math.floor(Math.random() * 100) + 1;
+						
+						if (points[senderNumber] == null)
+							points[senderNumber] = 0;
+						
+						if (num1 <= points[senderNumber]) {
+							num2 = Math.floor(num2);
+							if (num2 <= 0)
+								num2 = 1;
+							if (num2 >= 100)
+								num2 = 100;
+							
+							printer += "You gambled *" + num1 + "* points, with a winning chance of *" + num2 + "%*\n";
+							if (num1 == points[senderNumber])
+								printer += "Woah, are you really gambling it all?\n";
+							printer += "...\n\n";
+							
+							var newpoints = points[senderNumber];
+							
+							if (choice <= num2) {
+								var gain = ((100/num2 - 1)*1.5) * num1;
+								newpoints += gain;
+								printer += "YOU *WIN*!\n";
+								printer += "You've gained *" + gain.toFixed(4) + "* points!";
+							} else {
+								newpoints -= num1;
+								printer += "YOU *LOSE*!\n";
+								printer += "You've lost *" + num1 + "* points.";
+							}
+							
+							points[senderNumber] = parseFloat(newpoints.toFixed(4));
+							updateUser(senderNumber, points[senderNumber]);
+						} else {
+							printer += "Woah woah woah, you can't gamble more than you have!\n";
+							
+							if (points[senderNumber] == null)
+								points[senderNumber] = 0;
+							
+							printer += "You have: *" + points[senderNumber] + "* points.\n\n";
+							printer += "_Protip: You can call !Luna moneyshot to get a 50 points kickstart._";
+						}
+					} else
+						success = false;
+				} else
+					success = false;
+				
+				if (success == false) {
+					printer += "Usage: " + prefix + " bet _Quantity_ _ChosenNumber_\n\n";
+					printer += "Rules: You choose a random number. I will choose another random number *from 1 to 100*. If the number I choose is <= than yours, you win points.\n\n";
+					printer += "_The smaller the number you choose and the higher the amount gambled, the more points you win :^)_";
+				}
+			} else if (str.substring(0, 12).toLowerCase() == "changeprefix") {
 				if (chatname != debuggroupname) {
 					printer += "Sorry, debug features are only allowed on my debug group.";
 				} else {
@@ -919,25 +990,29 @@ async function resp (str, senderNumber, senderName, chatname) {
 		}
 	}
 	
-	//Erase each 50 MSGs
-	if (cnt == 50) {
+	//Erase after X messages
+	if (cnt == 20) {
 		cnt = 0;
-		try {
-			document.querySelector("#main > header > div._1i0-u > div > div:nth-child(3) > div").dispatchEvent(ClickEvent);
-			document.querySelector("#main > header > div._1i0-u > div > div.rAUz7._3TbsN > span > div > ul > li:nth-child(4)").dispatchEvent(ClickEvent);
-			document.querySelector("#main > header > div._1i0-u > div > div.rAUz7._3TbsN > span > div > ul > li:nth-child(4) > div").click();
-			document.querySelector("#app > div > span:nth-child(3) > div > div > div > div > div > div > div._3QNwO > div._1WZqU.PNlAR").click();
-		} catch (err) {
-			
-		}
+		eraseMSGs();
 	}
 	} catch (err) {
 		console.log("RESP ERROR: " + err);
 	}
 }
 
+function eraseMSGs () {
+	try {
+		document.querySelector("#main > header > div._1i0-u > div > div:nth-child(3) > div").dispatchEvent(ClickEvent);
+		document.querySelector("#main > header > div._1i0-u > div > div.rAUz7._3TbsN > span > div > ul > li:nth-child(4)").dispatchEvent(ClickEvent);
+		document.querySelector("#main > header > div._1i0-u > div > div.rAUz7._3TbsN > span > div > ul > li:nth-child(4) > div").click();
+		document.querySelector("#app > div > span:nth-child(3) > div > div > div > div > div > div > div._3QNwO > div._1WZqU.PNlAR").click();
+	} catch (err) {
+	
+	}	
+}
+
 function getMitsukuResponse (str) {
-	GeneralXMLHTTPRequest.open("POST", "https://miapi.pandorabots.com/talk?botkey=n0M6dW2XZacnOgCWTp0FRaadjiO5TASZD_5OKHTs9hqAp62JnACkE6BQdHSvL1lL7jiC3vL-JS0~&input=" + encodeURIComponent(str.replace(/luna/gi, "Mitsuku")) + "&client_name=cw166ad198f3f&sessionid=402747697&channel=6", false);
+	GeneralXMLHTTPRequest.open("POST", "https://miapi.pandorabots.com/talk?botkey=n0M6dW2XZacnOgCWTp0FRaadjiO5TASZD_5OKHTs9hqAp62JnACkE6BQdHSvL1lL7jiC3vL-JS0~&input=" + encodeURIComponent(str.replace(/luna/gi, "Mitsuku")) + "&client_name=cw166ad198f3f&sessionid=402959793&channel=6", false);
 	GeneralXMLHTTPRequest.send();
 	
 	if (GeneralXMLHTTPRequest.status != 200) {
