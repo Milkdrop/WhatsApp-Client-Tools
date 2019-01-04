@@ -13,6 +13,7 @@ For LunaBot Discord:
 - pip3 install selenium
 - pip3 install platform
 - pip3 install asyncio
+- For chromedriver: `sudo apt-get install chromium-chromedriver` (Then run `dpkg -L chromium-chromedriver` to see where it's located, and correctly specify every path in the LunaBotDiscord.py script)
 
 (Yes, Python3 required)
 
